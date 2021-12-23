@@ -5,6 +5,8 @@ package pl.bzowski;
  */
 public class App {
     public static void main(String[] args) {
-        ShareBuyer shareBuyer = new ShareBuyer();
+        ShareRepository shareRepository = new ShareRepository();
+        MyLogger logger = new MyLogger();
+        ShareBuyer shareBuyer = new ShareBuyer(shareRepository, logger);
     }
 }

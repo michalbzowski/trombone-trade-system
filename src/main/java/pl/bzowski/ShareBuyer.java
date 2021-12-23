@@ -2,8 +2,13 @@ package pl.bzowski;
 
 public class ShareBuyer {
 
-    private ShareRepository shareRepository;
-    private MyLogger logger;
+    private final ShareRepository shareRepository;
+    private final MyLogger logger;
+
+    public ShareBuyer(ShareRepository shareRepository, MyLogger logger) {
+        this.shareRepository = shareRepository;
+        this.logger = logger;
+    }
 
     public void sell() {
         shareRepository.saveSellOrder(new SellOrder());
@@ -14,13 +19,4 @@ public class ShareBuyer {
         shareRepository.saveBuyOrder(new BuyOrder());
         logger.log("buy");
     }
-
-    public void setShareRepository(ShareRepository shareRepository) {
-        this.shareRepository = shareRepository;
-    }
-
-    public void setLogger(MyLogger logger)  {
-        this.logger = logger;
-    }
-
 }
