@@ -4,10 +4,12 @@ public class ShareBuyer {
 
     private final ShareRepository shareRepository;
     private final MyLogger logger;
+    private final User user;
 
-    public ShareBuyer(ShareRepository shareRepository, MyLogger logger, String userName, String password, String userId) {
+    public ShareBuyer(ShareRepository shareRepository, MyLogger logger, User user) {
         this.shareRepository = shareRepository;
         this.logger = logger;
+        this.user = user;
     }
 
     public void sell() {
