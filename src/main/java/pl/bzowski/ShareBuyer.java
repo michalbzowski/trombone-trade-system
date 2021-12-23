@@ -5,7 +5,7 @@ public class ShareBuyer {
     private final ShareRepository shareRepository;
     private final MyLogger logger;
 
-    public ShareBuyer(ShareRepository shareRepository, MyLogger logger) {
+    public ShareBuyer(ShareRepository shareRepository, MyLogger logger, String userName, String password, String userId) {
         this.shareRepository = shareRepository;
         this.logger = logger;
     }
