@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="pl.bzowski.AppTest" time="0.023" tests="1" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="gopherProxySet" value="false"/>
+    <property name="awt.toolkit" value="sun.lwawt.macosx.LWCToolkit"/>
+    <property name="java.specification.version" value="11"/>
+    <property name="sun.cpu.isalist" value=""/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/Users/up75ir/IdeaProjects/trombone-trade-system/target/test-classes:/Users/up75ir/IdeaProjects/trombone-trade-system/target/classes:/Users/up75ir/.m2/repository/org/ta4j/ta4j-core/0.14/ta4j-core-0.14.jar:/Users/up75ir/.m2/repository/ch/qos/logback/logback-core/1.2.10/logback-core-1.2.10.jar:/Users/up75ir/.m2/repository/ch/qos/logback/logback-classic/1.2.10/logback-classic-1.2.10.jar:/Users/up75ir/.m2/repository/org/slf4j/slf4j-api/1.7.32/slf4j-api-1.7.32.jar:/Users/up75ir/.m2/repository/junit/junit/4.11/junit-4.11.jar:/Users/up75ir/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/Users/up75ir/.m2/repository/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar:/Users/up75ir/.m2/repository/org/jfree/jfreechart/1.5.3/jfreechart-1.5.3.jar:/Users/up75ir/.m2/repository/org/xerial/sqlite-jdbc/3.36.0.2/sqlite-jdbc-3.36.0.2.jar:"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="http://java.oracle.com/"/>
+    <property name="user.timezone" value=""/>
+    <property name="java.vm.specification.version" value="11"/>
+    <property name="os.name" value="Mac OS X"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="GB"/>
+    <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk-11.0.4.jdk/Contents/Home/lib"/>
+    <property name="sun.java.command" value="/Users/up75ir/IdeaProjects/trombone-trade-system/target/surefire/surefirebooter516067445584498151.jar /Users/up75ir/IdeaProjects/trombone-trade-system/target/surefire 2022-01-03T09-28-38_359-jvmRun1 surefire1994810657311420952tmp surefire_011085487438424998228tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="/Users/up75ir/IdeaProjects/trombone-trade-system/target/test-classes:/Users/up75ir/IdeaProjects/trombone-trade-system/target/classes:/Users/up75ir/.m2/repository/org/ta4j/ta4j-core/0.14/ta4j-core-0.14.jar:/Users/up75ir/.m2/repository/ch/qos/logback/logback-core/1.2.10/logback-core-1.2.10.jar:/Users/up75ir/.m2/repository/ch/qos/logback/logback-classic/1.2.10/logback-classic-1.2.10.jar:/Users/up75ir/.m2/repository/org/slf4j/slf4j-api/1.7.32/slf4j-api-1.7.32.jar:/Users/up75ir/.m2/repository/junit/junit/4.11/junit-4.11.jar:/Users/up75ir/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/Users/up75ir/.m2/repository/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar:/Users/up75ir/.m2/repository/org/jfree/jfreechart/1.5.3/jfreechart-1.5.3.jar:/Users/up75ir/.m2/repository/org/xerial/sqlite-jdbc/3.36.0.2/sqlite-jdbc-3.36.0.2.jar:"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/Users/up75ir"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2019-07-16"/>
+    <property name="java.home" value="/Library/Java/JavaVirtualMachines/jdk-11.0.4.jdk/Contents/Home"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/Users/up75ir/IdeaProjects/trombone-trade-system"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.awt.graphicsenv" value="sun.awt.CGraphicsEnvironment"/>
+    <property name="surefire.real.class.path" value="/Users/up75ir/IdeaProjects/trombone-trade-system/target/surefire/surefirebooter516067445584498151.jar"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="11.0.4+10-LTS"/>
+    <property name="user.name" value="up75ir"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="10.16"/>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="java.vendor.version" value="18.9"/>
+    <property name="localRepository" value="/Users/up75ir/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="http://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="/var/folders/rs/98yknr6910j1wrhqrh76djpm0000gp/T/"/>
+    <property name="idea.version" value="2021.1.2"/>
+    <property name="java.version" value="11.0.4"/>
+    <property name="user.dir" value="/Users/up75ir/IdeaProjects/trombone-trade-system"/>
+    <property name="os.arch" value="x86_64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="java.awt.printerjob" value="sun.lwawt.macosx.CPrinterJob"/>
+    <property name="sun.os.patch.level" value="unknown"/>
+    <property name="java.library.path" value="/Users/up75ir/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.info" value="mixed mode"/>
+    <property name="java.vm.version" value="11.0.4+10-LTS"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeBig"/>
+    <property name="java.class.version" value="55.0"/>
+  </properties>
+  <testcase name="shouldAnswerWithTrue" classname="pl.bzowski.AppTest" time="0.001"/>
+</testsuite>
