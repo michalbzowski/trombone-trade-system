@@ -1,5 +1,20 @@
 package pl.bzowski.bot;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.text.SimpleDateFormat;
+import java.awt.Window;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.plot.Marker;
+import org.jfree.chart.plot.ValueMarker;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.ui.ApplicationFrame;
+import org.jfree.data.time.Minute;
+import org.jfree.data.time.TimeSeriesCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ta4j.core.*;
@@ -13,39 +28,45 @@ import org.ta4j.core.rules.CrossedDownIndicatorRule;
 import org.ta4j.core.rules.CrossedUpIndicatorRule;
 import org.ta4j.core.rules.OverIndicatorRule;
 import org.ta4j.core.rules.UnderIndicatorRule;
+
+import pl.bzowski.bot.strategies.SimpleLongMACDEma100Strategy;
+import pl.bzowski.bot.positions.PositionContext;
+import pl.bzowski.bot.strategies.SimpleLongSarEma100Ema150Ema200Strategy;
+import pl.bzowski.bot.strategies.SimpleShortMACDEma100Strategy;
+import pl.bzowski.bot.strategies.SimpleShortSarEma100Ema150Ema200Strategy;
+import pl.bzowski.bot.strategies.StrategyWithLifeCycle;
+import pl.bzowski.bot.strategies.SimpleShortSarEma200Strategy;
 import pro.xstore.api.message.codes.PERIOD_CODE;
 import pro.xstore.api.message.records.RateInfoRecord;
 import pro.xstore.api.message.records.SCandleRecord;
 
 import java.time.*;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class BotInstanceForSymbol {
 
-    Logger logger = LoggerFactory.getLogger(BotInstanceForSymbol.class);
+    private Logger logger = LoggerFactory.getLogger(BotInstanceForSymbol.class);
 
     private final BarSeries series;
-    private List<RateInfoRecord> archiveCandles;
     private final PERIOD_CODE periodCode;
-    private Consumer<EnterContext> enterPosition;
-    private Consumer<EnterContext> closePosition;
-    private final String symbol;
-    BarSeriesManager seriesManager;
-    Num earnings;
-    Set<StrategyWithIndicators> strategies = new HashSet<>();
-    private final GrossReturnCriterion grc = new GrossReturnCriterion();
-    TradingRecord tradingRecord;
+    private Function<PositionContext, Long> openPosition;
+    private Function<PositionContext, Long> closePosition;
+    private Set<StrategyWithLifeCycle> strategies = new HashSet<>();
 
-    public BotInstanceForSymbol(String symbol, double spreadRaw, int digits, List<RateInfoRecord> archiveCandles, PERIOD_CODE periodCode, Consumer<EnterContext> enterPosition, Consumer<EnterContext> closePosition) {
-        this.symbol = symbol;
+    public BotInstanceForSymbol(String symbol, double spreadRaw, int digits, List<RateInfoRecord> archiveCandles,
+            PERIOD_CODE periodCode, Function<PositionContext, Long> openPosition,
+            Function<PositionContext, Long> closePosition) {
         this.series = new BaseBarSeries(symbol);
-
-        this.archiveCandles = archiveCandles;
         this.periodCode = periodCode;
-        this.enterPosition = enterPosition;
+        this.openPosition = openPosition;
         this.closePosition = closePosition;
         // Getting the bar series
         double divider = Math.pow(10, digits);
@@ -60,36 +81,22 @@ public class BotInstanceForSymbol {
             series.addBar(bar);
         });
 
-        this.strategies.add(buildLongStrategy(series, spreadRaw));
-        this.strategies.add(buildShortStrategy(series));
-        logger.info(symbol);
-        //BACKTEST
+        StrategyWithLifeCycle longStrategy = new SimpleLongSarEma100Ema150Ema200Strategy().buildStrategy(series);
+        strategies.add(longStrategy);
+
+        StrategyWithLifeCycle shortStrategy = new SimpleShortSarEma100Ema150Ema200Strategy().buildStrategy(series);
+        strategies.add(shortStrategy);
+
+        // BACKTEST
         // Running our juicy trading strategy...
+        StrategyAnalysis sa = new StrategyAnalysis();
         for (Strategy strategy : strategies) {
-            logger.info("Strategy name: {}", strategy.getName());
             BarSeriesManager manager = new BarSeriesManager(series);
             TradingRecord tradingRecord = manager.run(strategy);
-            logger.info("Number of trades for our strategy: " + tradingRecord.getPositionCount());
-
-            // Initializing the trading history
-            this.tradingRecord = new BaseTradingRecord();
-            // Getting the profitable trades ratio
-            AnalysisCriterion profitTradesRatio = new AverageProfitCriterion();
-            logger.info("AverageProfitCriterion: " + profitTradesRatio.calculate(series, tradingRecord));
-            AnalysisCriterion lossTradesRatio = new AverageLossCriterion();
-            logger.info("AverageLossCriterion: " + lossTradesRatio.calculate(series, tradingRecord));
-            AnalysisCriterion netProfitCriterion = new NetProfitCriterion();
-            logger.info("netProfitCriterion: " + netProfitCriterion.calculate(series, tradingRecord));
-            AnalysisCriterion netLossCriterion = new NetLossCriterion();
-            logger.info("netLossCriterion: " + netLossCriterion.calculate(series, tradingRecord));
-            AnalysisCriterion grossProfitCriterion = new GrossProfitCriterion();
-            logger.info("grossProfitCriterion: " + grossProfitCriterion.calculate(series, tradingRecord));
-            AnalysisCriterion grossLossCriterion = new GrossLossCriterion();
-            logger.info("grossLossCriterion: " + grossLossCriterion.calculate(series, tradingRecord));
-            AnalysisCriterion profitLossCriterion = new ProfitLossCriterion();
-            logger.info("profitLossCriterion: " + profitLossCriterion.calculate(series, tradingRecord));
+            sa.doIt(series, tradingRecord, strategy, symbol);
+            // displayChart(series, strategy, tradingRecord.getPositions());
+            // indiChart(symbol, strategy);
         }
-        logger.info("Bars count: {}", series.getBarCount());
     }
 
     /*
@@ -103,84 +110,191 @@ public class BotInstanceForSymbol {
 
         int endIndex = series.getEndIndex();
 
-        for (StrategyWithIndicators strategy : strategies) {
-            if (strategy.shouldEnter(endIndex)) {
+        for (StrategyWithLifeCycle strategy : strategies) {
+            PositionContext enterContext = new PositionContext(record.getSymbol(), strategy, endIndex);
+            loggingDebug(enterContext);
+            logger.info("Strategy: {}", strategy.getName());
+            boolean shouldEnter = strategy.shouldEnter(endIndex);
+            logger.info("- should enter {} on index {}", shouldEnter, endIndex);
+            if (shouldEnter) {
                 // Our strategy should enter
-                logger.info("Strategy " + strategy.getName() + " should ENTER on " + endIndex);
-                enterPosition.accept(new EnterContext(strategy.getName(), record.getSymbol(), strategy, endIndex));
-                boolean entered = tradingRecord.enter(endIndex, newBar.getClosePrice(), DecimalNum.valueOf(10));
-                if (entered) {
-                    Trade entry = tradingRecord.getLastEntry();
-
-                    logger.info("Entered on " + entry.getIndex() + " (price=" + entry.getNetPrice().doubleValue()
-                            + ", amount=" + entry.getAmount().doubleValue() + ")");
-                }
+                logger.info("Strategy {} should ENTER on {}", strategy.getName(), endIndex);
+                long id = this.openPosition.apply(enterContext);
+                logger.info("Opened position id: {}", id);
             } else if (strategy.shouldExit(endIndex)) {
-                logger.info("Strategy " + strategy.getName() + "should EXIT on " + endIndex);
-                closePosition.accept(new EnterContext(strategy.getName(), record.getSymbol(), strategy, endIndex));
-                boolean exited = tradingRecord.exit(endIndex, newBar.getClosePrice(), DecimalNum.valueOf(10));
-                if (exited) {
-                    Trade exit = tradingRecord.getLastExit();
-                    logger.info("Exited on " + exit.getIndex() + " (price=" + exit.getNetPrice().doubleValue()
-                            + ", amount=" + exit.getAmount().doubleValue() + ")");
-                }
+                long id = closePosition.apply(new PositionContext(record.getSymbol(), strategy, endIndex));
+                logger.info("ID after close {}?", id);
             }
-
-
-            this.earnings = grc.calculate(series, tradingRecord);
         }
+    }
 
+    private void loggingDebug(PositionContext enterContext) {
+        // logger.debug("Indicators - entering long {}:", enterContext.isLong());
+        // logger.debug("Enter index: {}", enterContext.getEnterIndex());
+        // logger.debug("EMA: {}",
+        // enterContext.getIndicator(EMAIndicator.class).getValue(enterContext.getEnterIndex()));
+        // logger.debug("SAR: {}",
+        // enterContext.getIndicator(ParabolicSarIndicator.class).getValue(enterContext.getEnterIndex()));
+        // logger.debug("CPI: {}",
+        // enterContext.getIndicator(ClosePriceIndicator.class).getValue(enterContext.getEnterIndex()));
+    }
+
+    private void indiChart(String symbol, Strategy strategy) {
+        /*
+         * Building chart dataset
+         */
+        TimeSeriesCollection dataset = new TimeSeriesCollection();
+        dataset.addSeries(buildChartBarSeries(series,
+                ((StrategyWithLifeCycle) strategy).getIndicator(ClosePriceIndicator.class), symbol));
+        dataset.addSeries(buildChartBarSeries(series,
+                ((StrategyWithLifeCycle) strategy).getIndicator(ParabolicSarIndicator.class), "PSAR"));
+        dataset.addSeries(buildChartBarSeries(series,
+                ((StrategyWithLifeCycle) strategy).getIndicator(EMAIndicator.class), "EMA200"));
+
+        /*
+         * Creating the chart
+         */
+        JFreeChart chart = ChartFactory.createTimeSeriesChart("Apple Inc. 2013 Close Prices", // title
+                "Date", // x-axis label
+                "Price Per Unit", // y-axis label
+                dataset, // data
+                true, // create legend?
+                true, // generate tooltips?
+                false // generate URLs?
+        );
+        XYPlot plot = (XYPlot) chart.getPlot();
+        DateAxis axis = (DateAxis) plot.getDomainAxis();
+        axis.setDateFormatOverride(new SimpleDateFormat("HH:mm"));
+        /*
+         * Displaying the chart
+         */
+        displayChart(chart);
+    }
+
+    /**
+     * Displays a chart in a frame.
+     *
+     * @param chart the chart to be displayed
+     */
+    private static void displayChart(JFreeChart chart) {
+        // Chart panel
+        ChartPanel panel = new ChartPanel(chart);
+        panel.setFillZoomRectangle(true);
+        panel.setMouseWheelEnabled(true);
+        panel.setPreferredSize(new java.awt.Dimension(500, 270));
+        // Application frame
+        ApplicationFrame frame = new ApplicationFrame("Ta4j example - Indicators to chart");
+        frame.setContentPane(panel);
+        frame.pack();
+        positionFrameOnScreen(frame, 0.5, 0.5);
+        frame.setVisible(true);
+    }
+
+    private static org.jfree.data.time.TimeSeries buildChartBarSeries(BarSeries barSeries, Indicator<Num> indicator,
+            String name) {
+        org.jfree.data.time.TimeSeries chartTimeSeries = new org.jfree.data.time.TimeSeries(name);
+        for (int i = 0; i < barSeries.getBarCount(); i++) {
+            Bar bar = barSeries.getBar(i);
+            chartTimeSeries.add(new Minute(Date.from(bar.getEndTime().toInstant())),
+                    indicator.getValue(i).doubleValue());
+        }
+        return chartTimeSeries;
     }
 
     private BaseBar getBaseBar(long code, long ctm, double close, double open, double high, double low) {
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(ctm + code * 60_000), ZoneId.systemDefault());
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(ctm + code * 60_000),
+                ZoneId.systemDefault());
         ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
-        return BaseBar
-                .builder()
-                .closePrice(DecimalNum.valueOf(close))
-                .openPrice(DecimalNum.valueOf(open))
-                .highPrice(DecimalNum.valueOf(high))
-                .lowPrice(DecimalNum.valueOf(low))
-                .endTime(zonedDateTime)
-                .timePeriod(Duration.ofMinutes(code))
-                .build();
+        return BaseBar.builder().closePrice(DecimalNum.valueOf(close)).openPrice(DecimalNum.valueOf(open))
+                .highPrice(DecimalNum.valueOf(high)).lowPrice(DecimalNum.valueOf(low)).endTime(zonedDateTime)
+                .timePeriod(Duration.ofMinutes(code)).build();
     }
 
-    //dodac stop loss na poziomie parabolicSar oraz take Profit 1.5
-    //dopasuj SL do r/r, bo czasem SAR jest bardzo daleko od ceny
-    //Parabolic SAR Divergence - kiedy cena podąża w przeciwnym kierunku niż indykator
-    //Wtedy istnieje szansa, że rysowany przez cenę trend będzie kontynuowany //TODO
-    //Cena idzie do góry = bullish divergence
-    //Cena idzie w dół = bearish divergence
-    //Sygnałem jest przejście SAR na drugą stronę wykresu
-//buy otwiera się po cenie ask a ja w seirach mam ceny close - bid
-    public static StrategyWithIndicators buildLongStrategy(BarSeries series, double spreadRaw) {
-        if (series == null) {
-            throw new IllegalArgumentException("Series cannot be null");
+    private static org.jfree.data.time.TimeSeries buildChartTimeSeries(BarSeries barSeries, Indicator<Num> indicator,
+            String name) {
+        org.jfree.data.time.TimeSeries chartTimeSeries = new org.jfree.data.time.TimeSeries(name);
+        for (int i = 0; i < barSeries.getBarCount(); i++) {
+            Bar bar = barSeries.getBar(i);
+            chartTimeSeries.add(new Minute(Date.from(bar.getEndTime().toInstant())),
+                    indicator.getValue(i).doubleValue());
         }
-        ParabolicSarIndicator parabolicSarIndicator = new ParabolicSarIndicator(series);
-        ClosePriceIndicator cpi = new ClosePriceIndicator(series);
-        EMAIndicator ema200 = new EMAIndicator(cpi, 200);
-
-        Rule enterRule = new CrossedDownIndicatorRule(parabolicSarIndicator, cpi)
-                .and(new OverIndicatorRule(parabolicSarIndicator, ema200));
-        Rule exitRule = new CrossedUpIndicatorRule(parabolicSarIndicator, cpi);
-        return new StrategyWithIndicators("SIMPLE-SAR+EMA200-LONG", enterRule, exitRule, parabolicSarIndicator, cpi, ema200);
+        return chartTimeSeries;
     }
 
-    public static StrategyWithIndicators buildShortStrategy(BarSeries series) {
-        if (series == null) {
-            throw new IllegalArgumentException("Series cannot be null");
+    private static void addBuySellSignals(BarSeries series, List<Position> positions, XYPlot plot) {
+        // Running the strategy
+        // Adding markers to plot
+        for (Position position : positions) {
+            // Buy signal
+            double buySignalBarTime = new Minute(
+                    Date.from(series.getBar(position.getEntry().getIndex()).getEndTime().toInstant()))
+                            .getFirstMillisecond();
+            Marker buyMarker = new ValueMarker(buySignalBarTime);
+            buyMarker.setPaint(Color.GREEN);
+            buyMarker.setLabel("B");
+            plot.addDomainMarker(buyMarker);
+            // Sell signal
+            double sellSignalBarTime = new Minute(
+                    Date.from(series.getBar(position.getExit().getIndex()).getEndTime().toInstant()))
+                            .getFirstMillisecond();
+            Marker sellMarker = new ValueMarker(sellSignalBarTime);
+            sellMarker.setPaint(Color.RED);
+            sellMarker.setLabel("S");
+            plot.addDomainMarker(sellMarker);
         }
-        ParabolicSarIndicator parabolicSarIndicator = new ParabolicSarIndicator(series);
-        ClosePriceIndicator cpi = new ClosePriceIndicator(series);
-        EMAIndicator ema200 = new EMAIndicator(cpi, 200);
-
-        Rule enterRule = new CrossedUpIndicatorRule(parabolicSarIndicator, cpi)
-                .and(new UnderIndicatorRule(parabolicSarIndicator, ema200));
-        Rule exitRule = new CrossedDownIndicatorRule(parabolicSarIndicator, cpi);
-        return new StrategyWithIndicators("SIMPLE-SAR+EMA200-SHORT", enterRule, exitRule, parabolicSarIndicator, cpi, ema200); //ONLY SHORT
     }
 
+    private static void displayChart(BarSeries series, Strategy strategy, List<Position> positions) {
+        /*
+         * Building chart datasets
+         */
+        TimeSeriesCollection dataset = new TimeSeriesCollection();
+        dataset.addSeries(buildChartTimeSeries(series, new ClosePriceIndicator(series), "Bitstamp Bitcoin (BTC)"));
+
+        /*
+         * Creating the chart
+         */
+        JFreeChart chart = ChartFactory.createTimeSeriesChart("Bitstamp BTC", // title
+                "Date", // x-axis label
+                "Price", // y-axis label
+                dataset, // data
+                true, // create legend?
+                true, // generate tooltips?
+                false // generate URLs?
+        );
+        XYPlot plot = (XYPlot) chart.getPlot();
+        DateAxis axis = (DateAxis) plot.getDomainAxis();
+        axis.setDateFormatOverride(new SimpleDateFormat("MM-dd HH:mm"));
+
+        /*
+         * Running the strategy and adding the buy and sell signals to plot
+         */
+        addBuySellSignals(series, positions, plot);
+
+        // Chart panel
+        ChartPanel panel = new ChartPanel(chart);
+        panel.setFillZoomRectangle(true);
+        panel.setMouseWheelEnabled(true);
+        panel.setPreferredSize(new Dimension(1024, 400));
+        // Application frame
+        ApplicationFrame frame = new ApplicationFrame("Ta4j example - Buy and sell signals to chart");
+        frame.setContentPane(panel);
+        frame.pack();
+        positionFrameOnScreen(frame, 0.5, 0.5);
+        frame.setVisible(true);
+    }
+
+    public static void positionFrameOnScreen(final Window frame, final double horizontalPercent,
+            final double verticalPercent) {
+
+        final Rectangle s = frame.getGraphicsConfiguration().getBounds();
+        final Dimension f = frame.getSize();
+        final int w = Math.max(s.width - f.width, 0);
+        final int h = Math.max(s.height - f.height, 0);
+        final int x = (int) (horizontalPercent * w) + s.x;
+        final int y = (int) (verticalPercent * h) + s.y;
+        frame.setBounds(x, y, f.width, f.height);
+
+    }
 
 }

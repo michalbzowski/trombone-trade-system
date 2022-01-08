@@ -31,30 +31,30 @@ public class TradingBot {
 
 
     public static void main(String[] args) throws Exception {
-        String LOGIN = args[1];
-        String PASSWORD = args[2];
+        String LOGIN = "";
+        String PASSWORD = "";
         //please provide the application details if you received them
-        String APP_ID = args[3];
-        String APP_NAME = args[4];
+        String APP_ID = "x";
+        String APP_NAME = "x";
         Credentials credentials = new Credentials(LOGIN, PASSWORD, APP_ID, APP_NAME);
         SyncAPIConnector connector = new SyncAPIConnector(ServerEnum.DEMO);
         LoginResponse loginResponse = APICommandFactory.executeLoginCommand(connector, credentials);
         if (loginResponse.getStatus()) {
-            symbols.add("TEZOS");
-            symbols.add("CHAINLINK");
-            symbols.add("EOS");
-            symbols.add("POLKADOT");
+            // symbols.add("GBPCHF");
+            // symbols.add("EURUSD");
+            // symbols.add("USDJPY");
+            // symbols.add("DE30");
+            symbols = Set.of("POLKADOT", "DOGECOIN", "CHAINLINK", "STELLAR");
             AllSymbolsResponse allSymbolsResponse = APICommandFactory.executeAllSymbolsCommand(connector);
-            Map<String, BotInstanceForSymbol> strategies = allSymbolsResponse.getSymbolRecords()
+            Map<String, BotInstanceForSymbol> bots = allSymbolsResponse.getSymbolRecords()
                     .stream()
                     .filter(SymbolRecord::isCurrencyPair)
-//                    .filter(sr -> sr.getSpreadRaw() < 0.04d)
                     .filter(sr -> symbols.contains(sr.getSymbol()))
                     .collect(Collectors.toUnmodifiableMap(SymbolRecord::getSymbol, BotFactory.createBotInstanceForSymbol(periodCode, connector)));
 
-            ShutdownHook.shutdownHook(connector, strategies);
+            ShutdownHook.shutdownHook(connector, bots);
 
-            runBot(connector, strategies);
+            runBot(connector, bots);
         }
     }
 

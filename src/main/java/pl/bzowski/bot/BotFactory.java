@@ -16,9 +16,12 @@ import java.time.Duration;
 import java.util.List;
 import java.util.function.Function;
 
+import pl.bzowski.bot.positions.ClosePosition;
+import pl.bzowski.bot.positions.OpenPosition;
+
 public class BotFactory {
 
-    private static final long ONE_DAY = 86_400_000;
+    private static final long ONE_DAY = 86_400_000 * 2;
     private static final long FOUR_HOURS = Duration.ofHours(4).toMillis();
 
     public static Function<SymbolRecord, BotInstanceForSymbol> createBotInstanceForSymbol(PERIOD_CODE periodCode, SyncAPIConnector connector) {
@@ -31,8 +34,8 @@ public class BotFactory {
                         chartResponse.getDigits(),
                         chartResponse.getRateInfos(),
                         periodCode,
-                        enterContext -> EnterPosition.enterPosition(connector, enterContext),
-                        enterContext -> ClosePosition.closePosition(connector, enterContext)
+                        enterContext -> new OpenPosition().openPosition(connector, enterContext),
+                        enterContext -> new ClosePosition().closePosition(connector, enterContext)
                 );
             } catch (APIErrorResponse | APICommunicationException | APIReplyParseException | APICommandConstructionException apiErrorResponse) {
                 apiErrorResponse.printStackTrace();
@@ -43,7 +46,7 @@ public class BotFactory {
 
     private static ChartResponse getArchiveCandles(String symbol, SyncAPIConnector connector, PERIOD_CODE periodCode) throws APIErrorResponse, APICommunicationException, APIReplyParseException, APICommandConstructionException {
         long NOW = System.currentTimeMillis();
-        ChartRangeInfoRecord record = new ChartRangeInfoRecord(symbol, periodCode, NOW - FOUR_HOURS, NOW);
+        ChartRangeInfoRecord record = new ChartRangeInfoRecord(symbol, periodCode, NOW - ONE_DAY, NOW);
         return APICommandFactory.executeChartRangeCommand(connector, record);
     }
 }
