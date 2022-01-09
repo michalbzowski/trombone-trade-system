@@ -1,47 +1,50 @@
 package pl.bzowski.bot;
 
+import org.ta4j.core.BarSeries;
+import pl.bzowski.bot.positions.ClosePosition;
+import pl.bzowski.bot.positions.OpenPosition;
 import pro.xstore.api.message.codes.PERIOD_CODE;
 import pro.xstore.api.message.command.APICommandFactory;
 import pro.xstore.api.message.error.APICommandConstructionException;
 import pro.xstore.api.message.error.APICommunicationException;
 import pro.xstore.api.message.error.APIReplyParseException;
 import pro.xstore.api.message.records.ChartRangeInfoRecord;
-import pro.xstore.api.message.records.RateInfoRecord;
 import pro.xstore.api.message.records.SymbolRecord;
 import pro.xstore.api.message.response.APIErrorResponse;
 import pro.xstore.api.message.response.ChartResponse;
 import pro.xstore.api.sync.SyncAPIConnector;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.function.Function;
-
-import pl.bzowski.bot.positions.ClosePosition;
-import pl.bzowski.bot.positions.OpenPosition;
 
 public class BotFactory {
 
     private static final long ONE_DAY = 86_400_000 * 2;
     private static final long FOUR_HOURS = Duration.ofHours(4).toMillis();
+    private final SyncAPIConnector connector;
+    private final PERIOD_CODE periodCode;
+    private final SeriesHandler seriesHandler;
 
-    public static Function<SymbolRecord, BotInstanceForSymbol> createBotInstanceForSymbol(PERIOD_CODE periodCode, SyncAPIConnector connector) {
-        return symbolRecord -> {
-            try {
-                String symbol = symbolRecord.getSymbol();
-                ChartResponse chartResponse = getArchiveCandles(symbol, connector, periodCode);
-                return new BotInstanceForSymbol(symbol,
-                        symbolRecord.getSpreadRaw(),
-                        chartResponse.getDigits(),
-                        chartResponse.getRateInfos(),
-                        periodCode,
-                        enterContext -> new OpenPosition().openPosition(connector, enterContext),
-                        enterContext -> new ClosePosition().closePosition(connector, enterContext)
-                );
-            } catch (APIErrorResponse | APICommunicationException | APIReplyParseException | APICommandConstructionException apiErrorResponse) {
-                apiErrorResponse.printStackTrace();
-            }
-            return null;
-        };
+    public BotFactory(SyncAPIConnector connector, PERIOD_CODE periodCode, SeriesHandler seriesHandler) {
+        this.connector = connector;
+        this.periodCode = periodCode;
+        this.seriesHandler = seriesHandler;
+    }
+
+    public BotInstanceForSymbol createBotInstance(SymbolRecord symbolRecord) {
+        try {
+            String symbol = symbolRecord.getSymbol();
+            BarSeries series = seriesHandler.createSeries(symbol);
+            ChartResponse chartResponse = getArchiveCandles(symbol, connector, periodCode);
+            seriesHandler.fillSeries(chartResponse.getRateInfos(), chartResponse.getDigits(), series);
+            return new BotInstanceForSymbol(symbol,
+                    series,
+                    enterContext -> new OpenPosition().openPosition(connector, enterContext),
+                    enterContext -> new ClosePosition().closePosition(connector, enterContext)
+            );
+        } catch (APIErrorResponse | APICommunicationException | APIReplyParseException | APICommandConstructionException apiErrorResponse) {
+            apiErrorResponse.printStackTrace();
+        }
+        return null;
     }
 
     private static ChartResponse getArchiveCandles(String symbol, SyncAPIConnector connector, PERIOD_CODE periodCode) throws APIErrorResponse, APICommunicationException, APIReplyParseException, APICommandConstructionException {

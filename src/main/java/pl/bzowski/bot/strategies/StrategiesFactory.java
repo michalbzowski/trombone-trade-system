@@ -23,18 +23,20 @@ public class StrategiesFactory {
    * eg SimpleLongSarEma200Strategy
    * or AgressiveShortSarEma200Strategy
    */
-  private static Map<Class<? extends StrategyBuilder>, StrategyWithLifeCycle> instances = new HashMap<>();
+  private static Map<Class<? extends StrategyBuilder>, LongShortStrategyPair> instances = new HashMap<>();
 
-  public static StrategyWithLifeCycle create(Class<? extends StrategyBuilder> strategyBuilderClass, BarSeries barSeries) {
+  public static LongShortStrategyPair create(Class<? extends StrategyBuilder> strategyBuilderClass, BarSeries barSeries) {
     if (instances.keySet().contains(strategyBuilderClass)) {
       return instances.get(strategyBuilderClass);
     } else {
       StrategyBuilder newInstance;
       try {
         newInstance = strategyBuilderClass.getConstructor().newInstance();
-        StrategyWithLifeCycle strategyWithLifeCycle = newInstance.buildStrategy(barSeries);
-        instances.put(strategyBuilderClass, strategyWithLifeCycle);
-        return strategyWithLifeCycle;
+        StrategyWithLifeCycle longStrategy = newInstance.getLongStrategy(barSeries);
+        StrategyWithLifeCycle shortStrategy = newInstance.getShortStrategy(barSeries);
+        LongShortStrategyPair value = new LongShortStrategyPair(longStrategy, shortStrategy);
+        instances.put(strategyBuilderClass, value);
+        return value;
       } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
           | NoSuchMethodException | SecurityException e) {
         logger.error("Crateing strategy instance error", e.getLocalizedMessage());

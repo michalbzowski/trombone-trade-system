@@ -3,5 +3,7 @@ package pl.bzowski.bot.strategies;
 import org.ta4j.core.BarSeries;
 
 public interface StrategyBuilder {
- StrategyWithLifeCycle buildStrategy(BarSeries series);
+    StrategyWithLifeCycle getLongStrategy(BarSeries series);
+
+    StrategyWithLifeCycle getShortStrategy(BarSeries series);
 }

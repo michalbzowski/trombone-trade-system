@@ -26,7 +26,7 @@ public class SimpleLongSarEma200Strategy implements StrategyBuilder {
   // Sygnałem jest przejście SAR na drugą stronę wykresu
   // buy otwiera się po cenie ask a ja w seirach mam ceny close - bid
   @Override
-  public StrategyWithLifeCycle buildStrategy(BarSeries series) {
+  public StrategyWithLifeCycle getLongStrategy(BarSeries series) {
     if (series == null) {
       throw new IllegalArgumentException("Series cannot be null");
     }
@@ -39,6 +39,21 @@ public class SimpleLongSarEma200Strategy implements StrategyBuilder {
     Rule exitRule = new CrossedUpIndicatorRule(parabolicSarIndicator, cpi);
     return new StrategyWithLifeCycle("SIMPLE-SAR+EMA200-LONG", enterRule, exitRule, parabolicSarIndicator, cpi,
         ema200);
+  }
+
+  @Override
+  public StrategyWithLifeCycle getShortStrategy(BarSeries series) {
+    if (series == null) {
+      throw new IllegalArgumentException("Series cannot be null");
+    }
+    ParabolicSarIndicator parabolicSarIndicator = new ParabolicSarIndicator(series);
+    ClosePriceIndicator cpi = new ClosePriceIndicator(series);
+    EMAIndicator ema200 = new EMAIndicator(cpi, 200);
+
+    Rule enterRule = new CrossedUpIndicatorRule(parabolicSarIndicator, cpi).and(new UnderIndicatorRule(cpi, ema200));
+    Rule exitRule = new CrossedDownIndicatorRule(parabolicSarIndicator, cpi);
+    return new StrategyWithLifeCycle("SIMPLE-SAR+EMA200-SHORT", enterRule, exitRule, parabolicSarIndicator, cpi,
+            ema200); // ONLY SHORT
   }
 
 }

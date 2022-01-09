@@ -17,7 +17,7 @@ import org.ta4j.core.rules.UnderIndicatorRule;
 public class SimpleLongStochEma200Strategy implements StrategyBuilder {
 
   @Override
-  public StrategyWithLifeCycle buildStrategy(BarSeries series) {
+  public StrategyWithLifeCycle getLongStrategy(BarSeries series) {
     if (series == null) {
       throw new IllegalArgumentException("Series cannot be null");
     }
@@ -33,6 +33,25 @@ public class SimpleLongStochEma200Strategy implements StrategyBuilder {
         .and(new OverIndicatorRule(cpi, ema200));
     Rule exitRule = new UnderIndicatorRule(kIndicator, 20);
     return new StrategyWithLifeCycle("SIMPLE-STOCH+EMA200-LONG", enterRule, exitRule, ema200, cpi);
+  }
+
+  @Override
+  public StrategyWithLifeCycle getShortStrategy(BarSeries series) {
+    if (series == null) {
+      throw new IllegalArgumentException("Series cannot be null");
+    }
+    StochasticOscillatorKIndicator kIndicator = new StochasticOscillatorKIndicator(series, 13);
+    StochasticOscillatorDIndicator dIndicator = new StochasticOscillatorDIndicator(kIndicator);
+
+    ClosePriceIndicator cpi = new ClosePriceIndicator(series);
+    EMAIndicator ema200 = new EMAIndicator(cpi, 200);
+
+    Rule enterRule = new CrossedDownIndicatorRule(kIndicator, dIndicator)
+            .and(new OverIndicatorRule(kIndicator, 20))//wejscie w praktycznie kazde skrzyzowanie linie
+            .and(new OverIndicatorRule(dIndicator, 20))
+            .and(new UnderIndicatorRule(cpi, ema200));
+    Rule exitRule = new UnderIndicatorRule(kIndicator, 20);
+    return new StrategyWithLifeCycle("SIMPLE-STOCH+EMA200-SHORT", enterRule, exitRule, ema200, cpi); // ONLY SHORT
   }
 
 }

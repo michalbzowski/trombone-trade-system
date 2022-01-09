@@ -12,19 +12,22 @@ public class TradeBotStreamListener extends StreamingListener {
     Logger logger = LoggerFactory.getLogger(TradeBotStreamListener.class);
 
     private final Map<String, BotInstanceForSymbol> strategies;
+    private final SeriesHandler seriesHandler;
 
-
-    public TradeBotStreamListener(Map<String, BotInstanceForSymbol> strategies) {
+    public TradeBotStreamListener(Map<String, BotInstanceForSymbol> strategies, SeriesHandler seriesHandler) {
         this.strategies = strategies;
+        this.seriesHandler = seriesHandler;
     }
 
     @Override
     public void receiveCandleRecord(SCandleRecord candleRecord) {
         logger.info("Stream candle record: " + candleRecord);
         BotInstanceForSymbol botInstanceForSymbol = strategies.get(candleRecord.getSymbol());
-        botInstanceForSymbol.onTick(candleRecord);
+        int endIndex = seriesHandler.update(candleRecord);
+        if (endIndex > 0) {
+            botInstanceForSymbol.onTick(endIndex);
+        }
     }
-
 
 
 }

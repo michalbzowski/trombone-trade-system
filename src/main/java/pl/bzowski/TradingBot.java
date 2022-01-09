@@ -5,18 +5,17 @@ import org.slf4j.LoggerFactory;
 import pl.bzowski.bot.*;
 import pro.xstore.api.message.codes.PERIOD_CODE;
 import pro.xstore.api.message.command.APICommandFactory;
-import pro.xstore.api.message.error.APICommandConstructionException;
 import pro.xstore.api.message.error.APICommunicationException;
-import pro.xstore.api.message.error.APIReplyParseException;
-import pro.xstore.api.message.records.*;
-import pro.xstore.api.message.response.*;
+import pro.xstore.api.message.records.SymbolRecord;
+import pro.xstore.api.message.response.AllSymbolsResponse;
+import pro.xstore.api.message.response.LoginResponse;
 import pro.xstore.api.sync.Credentials;
 import pro.xstore.api.sync.ServerData.ServerEnum;
 import pro.xstore.api.sync.SyncAPIConnector;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,7 +25,7 @@ public class TradingBot {
     static Logger logger = LoggerFactory.getLogger(TradingBot.class);
 
     //VARIABLES :P
-    static PERIOD_CODE periodCode = PERIOD_CODE.PERIOD_M1;
+    static PERIOD_CODE periodCode = PERIOD_CODE.PERIOD_M5;
     static Set<String> symbols = new HashSet<>();
 
 
@@ -44,30 +43,40 @@ public class TradingBot {
             // symbols.add("EURUSD");
             // symbols.add("USDJPY");
             // symbols.add("DE30");
-            symbols = Set.of("POLKADOT", "DOGECOIN", "CHAINLINK", "STELLAR");
+            symbols = Set.of("POLKADOT", "DOGECOIN", "CHAINLINK", "STELLAR", "BITCOIN");
+//            symbols = Set.of("BITCOIN");
             AllSymbolsResponse allSymbolsResponse = APICommandFactory.executeAllSymbolsCommand(connector);
-            Map<String, BotInstanceForSymbol> bots = allSymbolsResponse.getSymbolRecords()
+            SeriesHandler seriesHandler = new SeriesHandler(periodCode);
+
+            Set<SymbolRecord> filteredSymbolRecords = allSymbolsResponse.getSymbolRecords()
                     .stream()
                     .filter(SymbolRecord::isCurrencyPair)
                     .filter(sr -> symbols.contains(sr.getSymbol()))
-                    .collect(Collectors.toUnmodifiableMap(SymbolRecord::getSymbol, BotFactory.createBotInstanceForSymbol(periodCode, connector)));
+                    .collect(Collectors.toSet());
+            Map<String, BotInstanceForSymbol> bots =
+                    new HashMap<>();
+            BotFactory botFactory = new BotFactory(connector, periodCode, seriesHandler);
+            for (SymbolRecord symbolRecord : filteredSymbolRecords) {
+                BotInstanceForSymbol botInstance = botFactory.createBotInstance(symbolRecord);
+                bots.put(symbolRecord.getSymbol(), botInstance);
+            }
 
             ShutdownHook.shutdownHook(connector, bots);
 
-            runBot(connector, bots);
+            runBot(connector, bots, seriesHandler);
         }
     }
 
-    private static void runBot(SyncAPIConnector connector, Map<String, BotInstanceForSymbol> strategies) {
+    private static void runBot(SyncAPIConnector connector, Map<String, BotInstanceForSymbol> strategies, SeriesHandler seriesHandler) {
         javax.swing.SwingUtilities.invokeLater(() -> {
-            TradeBotStreamListener tradeBotStreamListener = new TradeBotStreamListener(strategies);
+            TradeBotStreamListener tradeBotStreamListener = new TradeBotStreamListener(strategies, seriesHandler);
             try {
                 connector.connectStream(tradeBotStreamListener);
-                strategies.entrySet().forEach(entry -> {
+                strategies.forEach((key, value) -> {
                     try {
-                        connector.subscribeCandle(entry.getKey());
+                        connector.subscribeCandle(key);
                     } catch (APICommunicationException e) {
-                       logger.error(e.getLocalizedMessage());
+                        logger.error(e.getLocalizedMessage());
                     }
 
                 });
