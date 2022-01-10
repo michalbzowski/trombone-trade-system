@@ -4,7 +4,7 @@ import org.json.simple.JSONObject;
 
 public class SCandleRecord implements BaseResponseRecord {
 
-    private long ctm;
+    protected long ctm;
     private String ctmString;
     private double open;
     private double high;

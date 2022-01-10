@@ -64,8 +64,8 @@ public class SeriesHandler {
 
         ZonedDateTime lastBarBeginTime = lastBar.getBeginTime();
         ZonedDateTime plus = lastBarBeginTime.plus(Duration.ofMillis(periodDurationInMilliseconds));
-        boolean after = plus.isEqual(currentOneMinuteBarBeginTime);
-        if (after) {
+        boolean isEquals = plus.isEqual(currentOneMinuteBarBeginTime);
+        if (!isEquals) {
             series.addPrice(newBar.getClosePrice());
             logger.info("Series updated by another one minute candle");
             return -1; //It means that there is no new bar

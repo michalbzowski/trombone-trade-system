@@ -25,7 +25,7 @@ public class TradingBot {
     static Logger logger = LoggerFactory.getLogger(TradingBot.class);
 
     //VARIABLES :P
-    static PERIOD_CODE periodCode = PERIOD_CODE.PERIOD_M5;
+    static PERIOD_CODE periodCode = PERIOD_CODE.PERIOD_M1;
     static Set<String> symbols = new HashSet<>();
 
 
