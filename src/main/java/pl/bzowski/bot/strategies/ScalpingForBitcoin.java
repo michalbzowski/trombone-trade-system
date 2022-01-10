@@ -8,6 +8,8 @@ import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 import org.ta4j.core.rules.CrossedDownIndicatorRule;
 import org.ta4j.core.rules.CrossedUpIndicatorRule;
 import org.ta4j.core.rules.OverIndicatorRule;
+import org.ta4j.core.rules.StopGainRule;
+import org.ta4j.core.rules.StopLossRule;
 import org.ta4j.core.rules.UnderIndicatorRule;
 
 public class ScalpingForBitcoin implements StrategyBuilder {
@@ -28,10 +30,11 @@ public class ScalpingForBitcoin implements StrategyBuilder {
       .and(new OverIndicatorRule(ema5, ema8))
       .and(new OverIndicatorRule(ema8, ema13));
     
-    Rule exitRule = new CrossedUpIndicatorRule(parabolicSarIndicator, ema5)
-      .or(new UnderIndicatorRule(ema5, ema8))
-      .or(new UnderIndicatorRule(ema8, ema13))
-      .or(new UnderIndicatorRule(cpi, ema5));
+    // Rule exitRule = new CrossedUpIndicatorRule(parabolicSarIndicator, ema5)
+    //   .or(new UnderIndicatorRule(ema5, ema8))
+    //   .or(new UnderIndicatorRule(ema8, ema13))
+    //   .or(new UnderIndicatorRule(cpi, ema5));
+    Rule exitRule = new StopLossRule(cpi, 0.5).or(new StopGainRule(cpi, 2));
     return new StrategyWithLifeCycle("BITCOIN-SAR+EMA5+EMA8+EMA13-LONG", enterRule, exitRule, parabolicSarIndicator, cpi,
         ema5, ema8, ema13);
   }
@@ -52,10 +55,11 @@ public class ScalpingForBitcoin implements StrategyBuilder {
             .and(new UnderIndicatorRule(ema5, ema8))
             .and(new UnderIndicatorRule(ema8, ema13));
 
-    Rule exitRule = new CrossedUpIndicatorRule(parabolicSarIndicator, ema5)
-            .or(new OverIndicatorRule(ema5, ema8))
-            .or(new OverIndicatorRule(ema8, ema13))
-            .or(new OverIndicatorRule(cpi, ema5));
+    // Rule exitRule = new CrossedDownIndicatorRule(parabolicSarIndicator, ema5)
+    //         .or(new OverIndicatorRule(ema5, ema8))
+    //         .or(new OverIndicatorRule(ema8, ema13))
+    //         .or(new OverIndicatorRule(cpi, ema5));
+    Rule exitRule = new StopLossRule(cpi, 0.5).or(new StopGainRule(cpi, 2));
     return new StrategyWithLifeCycle("BITCOIN-SAR+EMA5+EMA8+EMA13-SHORT", enterRule, exitRule, parabolicSarIndicator, cpi,
             ema5, ema8, ema13);
   }

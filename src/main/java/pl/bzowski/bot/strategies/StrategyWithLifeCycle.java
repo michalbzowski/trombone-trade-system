@@ -3,8 +3,10 @@ package pl.bzowski.bot.strategies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ta4j.core.BaseStrategy;
+import org.ta4j.core.BaseTradingRecord;
 import org.ta4j.core.Indicator;
 import org.ta4j.core.Rule;
+import org.ta4j.core.TradingRecord;
 
 import pl.bzowski.bot.states.PositionClosed;
 import pl.bzowski.bot.states.PositionCreated;
@@ -17,6 +19,7 @@ import java.util.Arrays;
 public class StrategyWithLifeCycle extends BaseStrategy {
 
     private PositionState positionState = new PositionClosed();
+    private TradingRecord tradingRecord = new BaseTradingRecord();
 
     private final Indicator[] indicators;
     public Logger logger = LoggerFactory.getLogger(StrategyWithLifeCycle.class);
@@ -80,5 +83,9 @@ public class StrategyWithLifeCycle extends BaseStrategy {
 
     public boolean isOpened() {
         return positionState.isOpened();
+    }
+
+    public TradingRecord getTradingRecord() {
+      return tradingRecord;
     }
 }

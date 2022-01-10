@@ -21,10 +21,12 @@ import org.ta4j.core.num.DecimalNum;
 import org.ta4j.core.num.Num;
 import pl.bzowski.bot.positions.PositionContext;
 import pl.bzowski.bot.strategies.ScalpingForBitcoin;
+import pl.bzowski.bot.strategies.SimpleLongStochEma200Strategy;
 import pl.bzowski.bot.strategies.StrategyWithLifeCycle;
 import pro.xstore.api.message.codes.PERIOD_CODE;
 import pro.xstore.api.message.records.RateInfoRecord;
 import pro.xstore.api.message.records.SCandleRecord;
+import pro.xstore.api.message.records.TradeRecord;
 
 import java.awt.*;
 import java.text.SimpleDateFormat;
@@ -46,19 +48,18 @@ public class BotInstanceForSymbol {
     private Set<StrategyWithLifeCycle> strategies = new HashSet<>();
 
     public BotInstanceForSymbol(String symbol,
-                                BarSeries series, Function<PositionContext, Long> openPosition,
-                                Function<PositionContext, Long> closePosition) {
+            BarSeries series, Function<PositionContext, Long> openPosition,
+            Function<PositionContext, Long> closePosition) {
 
         this.symbol = symbol;
         this.openPosition = openPosition;
         this.closePosition = closePosition;
         // Getting the bar series
 
-
-        StrategyWithLifeCycle longStrategy = new ScalpingForBitcoin().getLongStrategy(series);
+        StrategyWithLifeCycle longStrategy = new SimpleLongStochEma200Strategy().getLongStrategy(series);
         strategies.add(longStrategy);
 
-        StrategyWithLifeCycle shortStrategy = new ScalpingForBitcoin().getShortStrategy(series);
+        StrategyWithLifeCycle shortStrategy = new SimpleLongStochEma200Strategy().getShortStrategy(series);
         strategies.add(shortStrategy);
 
         // BACKTEST
@@ -84,14 +85,34 @@ public class BotInstanceForSymbol {
             logger.info("Strategy: {}", strategy.getName());
             boolean shouldEnter = strategy.shouldEnter(endIndex);
             logger.info("- should enter {} on index {}", shouldEnter, endIndex);
+            ClosePriceIndicator cpi = (ClosePriceIndicator) strategy.getIndicator(ClosePriceIndicator.class);
             if (shouldEnter) {
                 // Our strategy should enter
-                logger.info("Strategy {} should ENTER on {}", strategy.getName(), endIndex);
+                logger.info("Should strategy {} ENTER for {} on {}?", strategy.getName(), symbol, endIndex);
                 long id = this.openPosition.apply(enterContext);
                 logger.info("Opened position id: {}", id);
-            } else if (strategy.shouldExit(endIndex)) {
-                long id = closePosition.apply(new PositionContext(symbol, strategy, endIndex));
-                logger.info("ID after close {}?", id);
+
+                boolean entered = strategy.getTradingRecord().enter(endIndex, cpi.getValue(endIndex),
+                        DecimalNum.valueOf(0.01));
+                if (entered) {
+                    Trade entry = strategy.getTradingRecord().getLastEntry();
+                    System.out.println("Entered on " + entry.getIndex() + " (price=" + entry.getNetPrice().doubleValue()
+                            + ", amount=" + entry.getAmount().doubleValue() + ")");
+                }
+            } else {
+                logger.info("Should strategy {} CLOSE for {} on {}?", strategy.getName(), symbol, endIndex);
+                if (strategy.shouldExit(endIndex)) {
+                    long id = closePosition.apply(new PositionContext(symbol, strategy, endIndex));
+                    logger.info("ID after close {}?", id);
+                    boolean exited = strategy.getTradingRecord().exit(endIndex, cpi.getValue(endIndex),
+                            DecimalNum.valueOf(0.01));
+                    if (exited) {
+                        Trade exit = strategy.getTradingRecord().getLastExit();
+                        System.out
+                                .println("Exited on " + exit.getIndex() + " (price=" + exit.getNetPrice().doubleValue()
+                                        + ", amount=" + exit.getAmount().doubleValue() + ")");
+                    }
+                }
             }
         }
     }

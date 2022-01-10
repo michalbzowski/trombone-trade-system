@@ -30,6 +30,7 @@ public class TradingBot {
 
 
     public static void main(String[] args) throws Exception {
+        logger.info("Version: {}", 0.4);
         String LOGIN = "";
         String PASSWORD = "";
         //please provide the application details if you received them
@@ -39,11 +40,11 @@ public class TradingBot {
         SyncAPIConnector connector = new SyncAPIConnector(ServerEnum.DEMO);
         LoginResponse loginResponse = APICommandFactory.executeLoginCommand(connector, credentials);
         if (loginResponse.getStatus()) {
-            // symbols.add("GBPCHF");
-            // symbols.add("EURUSD");
-            // symbols.add("USDJPY");
-            // symbols.add("DE30");
-            symbols = Set.of("POLKADOT", "DOGECOIN", "CHAINLINK", "STELLAR", "BITCOIN");
+            symbols.add("GBPCHF");
+            symbols.add("EURUSD");
+            symbols.add("USDJPY");
+            symbols.add("DE30");
+            // symbols = Set.of("POLKADOT", "DOGECOIN", "CHAINLINK", "STELLAR", "BITCOIN");
 //            symbols = Set.of("BITCOIN");
             AllSymbolsResponse allSymbolsResponse = APICommandFactory.executeAllSymbolsCommand(connector);
             SeriesHandler seriesHandler = new SeriesHandler(periodCode);

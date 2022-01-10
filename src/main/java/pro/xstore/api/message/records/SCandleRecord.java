@@ -27,6 +27,10 @@ public class SCandleRecord implements BaseResponseRecord {
         this.vol = (Double) ob.get("vol");
     }
 
+	public void setCtm(long ctm) {
+		this.ctm = ctm;
+	}
+	
 	public long getCtm() {
 		return ctm;
 	}
@@ -70,4 +74,8 @@ public class SCandleRecord implements BaseResponseRecord {
 				+ ", close=" + close + ", vol=" + vol + ", quoteId=" + quoteId
 				+ ", symbol=" + symbol + "]";
 	}
+
+  public void setSymbol(String symbol) {
+		this.symbol = symbol;
+  }
 }
