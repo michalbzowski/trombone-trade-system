@@ -20,17 +20,14 @@ public class SeriesHandlerTest {
     public void shouldCreateOneSeriesForEverySymbol() {
         PERIOD_CODE periodCode = PERIOD_CODE.PERIOD_M15;
         SeriesHandler seriesHandler = new SeriesHandler(periodCode);
-        ZonedDateTime now = ZonedDateTime.of(2020, 12, 1, 12, 15, 0, 0, ZoneId.of("UTC"));
+        ZonedDateTime now = TestContext.NOW_MOCK;
         TimeMachine timeMachine = new TimeMachine(now);
 
-        String usdJpySymbol = "USDJPY";
-        BarSeries usdJpyBarSeries = seriesHandler.createSeries(usdJpySymbol);
+        BarSeries usdJpyBarSeries = seriesHandler.createSeries(TestContext.USD_JPY);
 
-        String eurUsdSymbol = "EURUSD";
-        BarSeries eurUsdBarSeries = seriesHandler.createSeries(eurUsdSymbol);
+        BarSeries eurUsdBarSeries = seriesHandler.createSeries(TestContext.EUR_USD);
 
-        String plnUsdSymbol = "PLNUSD";
-        BarSeries plnUsdBarSeries = seriesHandler.createSeries(plnUsdSymbol);
+        BarSeries plnUsdBarSeries = seriesHandler.createSeries(TestContext.PLN_USD);
 
         seriesHandler.fillSeries(timeMachine.generateFullyEndedCandles(6, periodCode.getCode()), 3, usdJpyBarSeries);
         seriesHandler.fillSeries(timeMachine.generateFullyEndedCandles(10, periodCode.getCode()), 3, eurUsdBarSeries);
@@ -43,11 +40,11 @@ public class SeriesHandlerTest {
 
     @Test
     public void whenOneMinuteCandleIsAddedToOneMinuteBarSeriesNewBarShouldBeCreated() {
-        ZonedDateTime now = ZonedDateTime.of(2020, 12, 1, 12, 15, 0, 0, ZoneId.of("UTC"));
+        ZonedDateTime now = TestContext.NOW_MOCK;
         TimeMachine timeMachine = new TimeMachine(now);
         PERIOD_CODE periodCode = PERIOD_CODE.PERIOD_M1;
         SeriesHandler seriesHandler = new SeriesHandler(periodCode);
-        String symbol = "USDJPY";
+        String symbol = TestContext.USD_JPY;
         BarSeries usdJpyBarSeries = seriesHandler.createSeries(symbol);
 
         int howManyHistoricCandles = 1;
@@ -68,11 +65,11 @@ public class SeriesHandlerTest {
 
     @Test
     public void whenTwoOneMinuteCandlesWereAddedToOneOneMinuteCandleThenTwoNewBarsShouldBeAdded() {
-        ZonedDateTime now = ZonedDateTime.of(2020, 12, 1, 12, 15, 0, 0, ZoneId.of("UTC"));
+        ZonedDateTime now = TestContext.NOW_MOCK;
         TimeMachine timeMachine = new TimeMachine(now);
         PERIOD_CODE periodCode = PERIOD_CODE.PERIOD_M1;
         SeriesHandler seriesHandler = new SeriesHandler(periodCode);
-        String symbol = "USDJPY";
+        String symbol = TestContext.USD_JPY;
         BarSeries usdJpyBarSeries = seriesHandler.createSeries(symbol);
         int howManyHistoricCandles = 1;
         List<RateInfoRecord> historicCandles = timeMachine.generateFullyEndedCandles(howManyHistoricCandles,

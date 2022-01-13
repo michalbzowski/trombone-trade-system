@@ -18,14 +18,16 @@ import java.util.Arrays;
 
 public class StrategyWithLifeCycle extends BaseStrategy {
 
+    private String symbol;
     private PositionState positionState = new PositionClosed();
     private TradingRecord tradingRecord = new BaseTradingRecord();
 
     private final Indicator[] indicators;
     public Logger logger = LoggerFactory.getLogger(StrategyWithLifeCycle.class);
 
-    public StrategyWithLifeCycle(String name, Rule entryRule, Rule exitRule, Indicator... indicators) {
+    public StrategyWithLifeCycle(String name, String symbol, Rule entryRule, Rule exitRule, Indicator... indicators) {
         super(name, entryRule, exitRule);
+        this.symbol = symbol;
         this.indicators = indicators;
     }
 
@@ -81,11 +83,23 @@ public class StrategyWithLifeCycle extends BaseStrategy {
         return 0;
     }
 
-    public boolean isOpened() {
+    public boolean isPositionAlreadyOpened() {
         return positionState.isOpened();
     }
 
     public TradingRecord getTradingRecord() {
       return tradingRecord;
+    }
+    
+    public String getSymbol() {
+      return symbol;
+    }
+
+    public boolean isLong() {
+      return getName().contains("LONG");
+    }
+
+    public boolean isShort() {
+      return getName().contains("SHORT");
     }
 }

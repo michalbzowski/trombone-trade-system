@@ -19,6 +19,9 @@ import org.ta4j.core.indicators.ParabolicSarIndicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 import org.ta4j.core.num.DecimalNum;
 import org.ta4j.core.num.Num;
+
+import pl.bzowski.bot.positions.ClosePosition;
+import pl.bzowski.bot.positions.OpenPosition;
 import pl.bzowski.bot.positions.PositionContext;
 import pl.bzowski.bot.strategies.ScalpingForBitcoin;
 import pl.bzowski.bot.strategies.SimpleLongStochEma200Strategy;
@@ -43,13 +46,11 @@ public class BotInstanceForSymbol {
     private final String symbol;
     private static final Logger logger = LoggerFactory.getLogger(BotInstanceForSymbol.class);
 
-    private Function<PositionContext, Long> openPosition;
-    private Function<PositionContext, Long> closePosition;
+    private OpenPosition openPosition;
+    private ClosePosition closePosition;
     private Set<StrategyWithLifeCycle> strategies = new HashSet<>();
 
-    public BotInstanceForSymbol(String symbol,
-            BarSeries series, Function<PositionContext, Long> openPosition,
-            Function<PositionContext, Long> closePosition) {
+    public BotInstanceForSymbol(String symbol, BarSeries series, OpenPosition openPosition, ClosePosition closePosition) {
 
         this.symbol = symbol;
         this.openPosition = openPosition;
@@ -80,8 +81,6 @@ public class BotInstanceForSymbol {
     public void onTick(int endIndex) {
 
         for (StrategyWithLifeCycle strategy : strategies) {
-            PositionContext enterContext = new PositionContext(symbol, strategy, endIndex);
-            loggingDebug(enterContext);
             logger.info("Strategy: {}", strategy.getName());
             boolean shouldEnter = strategy.shouldEnter(endIndex);
             logger.info("- should enter {} on index {}", shouldEnter, endIndex);
@@ -89,7 +88,7 @@ public class BotInstanceForSymbol {
             if (shouldEnter) {
                 // Our strategy should enter
                 logger.info("Should strategy {} ENTER for {} on {}?", strategy.getName(), symbol, endIndex);
-                long id = this.openPosition.apply(enterContext);
+                long id = this.openPosition.openPosition(strategy);
                 logger.info("Opened position id: {}", id);
 
                 boolean entered = strategy.getTradingRecord().enter(endIndex, cpi.getValue(endIndex),
@@ -102,7 +101,7 @@ public class BotInstanceForSymbol {
             } else {
                 logger.info("Should strategy {} CLOSE for {} on {}?", strategy.getName(), symbol, endIndex);
                 if (strategy.shouldExit(endIndex)) {
-                    long id = closePosition.apply(new PositionContext(symbol, strategy, endIndex));
+                    long id = closePosition.closePosition(strategy);
                     logger.info("ID after close {}?", id);
                     boolean exited = strategy.getTradingRecord().exit(endIndex, cpi.getValue(endIndex),
                             DecimalNum.valueOf(0.01));

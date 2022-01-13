@@ -5,6 +5,11 @@ import org.slf4j.LoggerFactory;
 import pl.bzowski.bot.*;
 import pro.xstore.api.message.codes.PERIOD_CODE;
 import pro.xstore.api.message.command.APICommandFactory;
+
+
+import pl.bzowski.bot.commands.*;
+import pl.bzowski.bot.positions.ClosePosition;
+import pl.bzowski.bot.positions.OpenPosition;
 import pro.xstore.api.message.error.APICommunicationException;
 import pro.xstore.api.message.records.SymbolRecord;
 import pro.xstore.api.message.response.AllSymbolsResponse;
@@ -28,9 +33,8 @@ public class TradingBot {
     static PERIOD_CODE periodCode = PERIOD_CODE.PERIOD_M1;
     static Set<String> symbols = new HashSet<>();
 
-
     public static void main(String[] args) throws Exception {
-        logger.info("Version: {}", 0.4);
+        logger.info("Version: {}", 0.5);
         String LOGIN = "";
         String PASSWORD = "";
         //please provide the application details if you received them
@@ -56,7 +60,16 @@ public class TradingBot {
                     .collect(Collectors.toSet());
             Map<String, BotInstanceForSymbol> bots =
                     new HashMap<>();
-            BotFactory botFactory = new BotFactory(connector, periodCode, seriesHandler);
+
+            ChartRangeCommand chartRangeCommand = new ChartRangeCommand(connector);
+            TradeTransactionCommand tradeTransactionCommand = new TradeTransactionCommand(connector);
+            SymbolCommand symbolCommand = new SymbolCommand(connector);
+            TradeTransactionStatusCommand tradeTransactionStatusCommand = new TradeTransactionStatusCommand(connector);
+            TradesCommand tradesCommand = new TradesCommand(connector);
+            OpenPosition openPosition = new OpenPosition(tradeTransactionCommand, symbolCommand, tradeTransactionStatusCommand, tradesCommand);
+            ClosePosition closePosition = new ClosePosition(tradesCommand, tradeTransactionCommand, tradeTransactionStatusCommand);
+
+            BotFactory botFactory = new BotFactory(periodCode, seriesHandler, chartRangeCommand, openPosition, closePosition);
             for (SymbolRecord symbolRecord : filteredSymbolRecords) {
                 BotInstanceForSymbol botInstance = botFactory.createBotInstance(symbolRecord);
                 bots.put(symbolRecord.getSymbol(), botInstance);

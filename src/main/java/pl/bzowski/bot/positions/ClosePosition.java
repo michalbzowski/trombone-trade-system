@@ -3,6 +3,10 @@ package pl.bzowski.bot.positions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import pl.bzowski.bot.commands.TradeTransactionCommand;
+import pl.bzowski.bot.commands.TradeTransactionStatusCommand;
+import pl.bzowski.bot.commands.TradesCommand;
+import pl.bzowski.bot.strategies.StrategyWithLifeCycle;
 import pro.xstore.api.message.codes.TRADE_OPERATION_CODE;
 import pro.xstore.api.message.codes.TRADE_TRANSACTION_TYPE;
 import pro.xstore.api.message.command.APICommandFactory;
@@ -20,14 +24,24 @@ import pro.xstore.api.sync.SyncAPIConnector;
 public class ClosePosition {
 
     Logger logger = LoggerFactory.getLogger(ClosePosition.class);
+    private TradesCommand tradesCommand;
+    private TradeTransactionCommand tradeTransactionCommand;
+    private TradeTransactionStatusCommand tradeTransactionStatusCommand;
 
-    public synchronized long closePosition(SyncAPIConnector connector, PositionContext exitContext) {
+    public ClosePosition(TradesCommand tradesCommand, TradeTransactionCommand tradeTransactionCommand, TradeTransactionStatusCommand tradeTransactionStatusCommand) {
+        this.tradesCommand = tradesCommand;
+        this.tradeTransactionCommand = tradeTransactionCommand;
+        this.tradeTransactionStatusCommand = tradeTransactionStatusCommand;
+    }
+        
+
+    public synchronized long closePosition(StrategyWithLifeCycle strategy) {
         TradesResponse tradesResponse;
         try {
-            tradesResponse = APICommandFactory.executeTradesCommand(connector, true);
+            tradesResponse = tradesCommand.execute(true);
             TradeRecord tradeRecordToClose = null;
             for (TradeRecord tradeRecord : tradesResponse.getTradeRecords()) {
-                if (exitContext.canBeClosed(tradeRecord.getOrder2())) {
+                if (strategy.canBeClosed(tradeRecord.getOrder2())) {
                     tradeRecordToClose = tradeRecord;
                 }
             }
@@ -43,17 +57,15 @@ public class ClosePosition {
             String customComment = "Closed by bot";
             long expiration = 0;
             TradeTransInfoRecord ttCloseInfoRecord = new TradeTransInfoRecord(
-                    exitContext.isShort() ? TRADE_OPERATION_CODE.SELL : TRADE_OPERATION_CODE.BUY,
+                    strategy.isShort() ? TRADE_OPERATION_CODE.SELL : TRADE_OPERATION_CODE.BUY,
                     TRADE_TRANSACTION_TYPE.CLOSE,
                     price, sl, tp, symbol, volume, order, customComment, expiration);
             TradeTransactionResponse closeTradeTransactionResponse;
 
-            closeTradeTransactionResponse = APICommandFactory.executeTradeTransactionCommand(connector,
-                    ttCloseInfoRecord);
+            closeTradeTransactionResponse = tradeTransactionCommand.execute(ttCloseInfoRecord);
             TradeTransactionStatusResponse ttsCloseResponse;
-            ttsCloseResponse = APICommandFactory.executeTradeTransactionStatusCommand(connector,
-                    closeTradeTransactionResponse.getOrder());
-            exitContext.closePosition();
+            ttsCloseResponse = tradeTransactionStatusCommand.execute(closeTradeTransactionResponse.getOrder());
+            strategy.closePosition();
             logger.info("Closed: {}", ttsCloseResponse);
         } catch (APIErrorResponse | APICommandConstructionException | APIReplyParseException
                 | APICommunicationException e1) {

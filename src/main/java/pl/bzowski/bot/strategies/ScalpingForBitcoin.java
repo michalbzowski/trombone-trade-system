@@ -14,6 +14,7 @@ import org.ta4j.core.rules.UnderIndicatorRule;
 
 public class ScalpingForBitcoin implements StrategyBuilder {
 
+
   @Override
   public StrategyWithLifeCycle getLongStrategy(BarSeries series) {
     if (series == null) {

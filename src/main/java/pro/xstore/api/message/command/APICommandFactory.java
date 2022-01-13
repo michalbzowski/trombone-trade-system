@@ -150,10 +150,10 @@ public class APICommandFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public static ChartRangeCommand createChartRangeCommand(ChartRangeInfoRecord info) throws APICommandConstructionException {
+    public static ChartRangeCommand createChartRangeCommand(SyncAPIConnector connector, ChartRangeInfoRecord info) throws APICommandConstructionException {
         JSONObject args = new JSONObject();
         args.put("info", info.toJSONObject());
-        return new ChartRangeCommand(args);
+        return new ChartRangeCommand(args, connector);
 
     }
 
@@ -174,10 +174,10 @@ public class APICommandFactory {
     }
     
     @SuppressWarnings("unchecked")
-    public static ChartRangeCommand createChartRangeCommand(String symbol, PERIOD_CODE period, Long start, Long end, Long ticks) throws APICommandConstructionException {
+    public static ChartRangeCommand createChartRangeCommand(SyncAPIConnector connector, String symbol, PERIOD_CODE period, Long start, Long end, Long ticks) throws APICommandConstructionException {
         JSONObject args = new JSONObject();
         args.put("info", (new ChartRangeInfoRecord(symbol, period, start, end, ticks)).toJSONObject());
-        return new ChartRangeCommand(args);
+        return new ChartRangeCommand(args, connector);
     }
 
     public static CalendarCommand createCalendarCommand() throws APICommandConstructionException {
@@ -248,10 +248,10 @@ public class APICommandFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public static SymbolCommand createSymbolCommand(String symbol) throws APICommandConstructionException {
+    public static SymbolCommand createSymbolCommand(SyncAPIConnector connector, String symbol) throws APICommandConstructionException {
         JSONObject args = new JSONObject();
         args.put("symbol", symbol);
-        return new SymbolCommand(args);
+        return new SymbolCommand(args, connector);
     }
 
     @SuppressWarnings("unchecked")
@@ -275,31 +275,31 @@ public class APICommandFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public static TradeTransactionCommand createTradeTransactionCommand(TradeTransInfoRecord tradeTransInfo) throws APICommandConstructionException {
+    public static TradeTransactionCommand createTradeTransactionCommand(SyncAPIConnector connector, TradeTransInfoRecord tradeTransInfo) throws APICommandConstructionException {
         JSONObject args = new JSONObject();
         args.put("tradeTransInfo", tradeTransInfo.toJSONObject());
-        return new TradeTransactionCommand(args);
+        return new TradeTransactionCommand(args, connector);
     }
 
     @SuppressWarnings("unchecked")
-    public static TradeTransactionCommand createTradeTransactionCommand(TRADE_OPERATION_CODE cmd, TRADE_TRANSACTION_TYPE type, Double price, Double sl, Double tp, String symbol, Double volume, Long order, String customComment, Long expiration) throws APICommandConstructionException {
+    public static TradeTransactionCommand createTradeTransactionCommand(SyncAPIConnector connector, TRADE_OPERATION_CODE cmd, TRADE_TRANSACTION_TYPE type, Double price, Double sl, Double tp, String symbol, Double volume, Long order, String customComment, Long expiration) throws APICommandConstructionException {
         JSONObject args = new JSONObject();
         args.put("tradeTransInfo", new TradeTransInfoRecord(cmd, type, price, sl, tp, symbol, volume, order, customComment, expiration).toJSONObject());
-        return new TradeTransactionCommand(args);
+        return new TradeTransactionCommand(args, connector);
     }
 
     @SuppressWarnings("unchecked")
-    public static TradeTransactionStatusCommand createTradeTransactionStatusCommand(long order) throws APICommandConstructionException {
+    public static TradeTransactionStatusCommand createTradeTransactionStatusCommand(SyncAPIConnector connector, long order) throws APICommandConstructionException {
         JSONObject args = new JSONObject();
         args.put("order", order);
-        return new TradeTransactionStatusCommand(args);
+        return new TradeTransactionStatusCommand(args, connector);
     }
 
     @SuppressWarnings("unchecked")
-    public static TradesCommand createTradesCommand(boolean openedOnly) throws APICommandConstructionException {
+    public static TradesCommand createTradesCommand(SyncAPIConnector connector, boolean openedOnly) throws APICommandConstructionException {
         JSONObject args = new JSONObject();
         args.put("openedOnly", openedOnly);
-        return new TradesCommand(args);
+        return new TradesCommand(args, connector);
     }
 
     @SuppressWarnings("unchecked")
@@ -324,11 +324,11 @@ public class APICommandFactory {
     }
 
     public static ChartResponse executeChartRangeCommand(SyncAPIConnector connector, ChartRangeInfoRecord info) throws APICommandConstructionException, APIReplyParseException, APIErrorResponse, APICommunicationException {
-        return new ChartResponse(connector.safeExecuteCommand(createChartRangeCommand(info)));
+        return new ChartResponse(connector.safeExecuteCommand(createChartRangeCommand(connector, info)));
     }
 
     public static ChartResponse executeChartRangeCommand(SyncAPIConnector connector, String symbol, PERIOD_CODE period, Long start, Long end, Long ticks) throws APICommandConstructionException, APIReplyParseException, APICommunicationException, APIErrorResponse {
-        return new ChartResponse(connector.safeExecuteCommand(createChartRangeCommand(symbol, period, start, end, ticks)));
+        return new ChartResponse(connector.safeExecuteCommand(createChartRangeCommand(connector, symbol, period, start, end, ticks)));
     }
     
     public static CalendarResponse executeCalendarCommand(SyncAPIConnector connector) throws APICommandConstructionException, APIReplyParseException, APICommunicationException, APIErrorResponse {
@@ -392,7 +392,7 @@ public class APICommandFactory {
     }
 
     public static SymbolResponse executeSymbolCommand(SyncAPIConnector connector, String symbol) throws APICommandConstructionException, APIReplyParseException, APIErrorResponse, APICommunicationException {
-        return new SymbolResponse(connector.safeExecuteCommand(createSymbolCommand(symbol)));
+        return new SymbolResponse(connector.safeExecuteCommand(createSymbolCommand(connector, symbol)));
     }
 
     public static TickPricesResponse executeTickPricesCommand(SyncAPIConnector connector, Long level, List<String> symbols, Long timestamp) throws APICommandConstructionException, APICommunicationException, APIReplyParseException, APIErrorResponse {
@@ -404,7 +404,7 @@ public class APICommandFactory {
     }
 
     public static TradeTransactionResponse executeTradeTransactionCommand(SyncAPIConnector connector, TradeTransInfoRecord tradeTransInfo) throws APICommandConstructionException, APIReplyParseException, APICommunicationException, APIErrorResponse {
-        return new TradeTransactionResponse(connector.safeExecuteCommand(createTradeTransactionCommand(tradeTransInfo)));
+        return new TradeTransactionResponse(connector.safeExecuteCommand(createTradeTransactionCommand(connector, tradeTransInfo)));
     }
 
     public static TradeTransactionResponse executeTradeTransactionCommand(SyncAPIConnector connector, TradeTransactionCommand tradeTransactionCommand) throws APIReplyParseException, APICommunicationException, APIErrorResponse {
@@ -412,15 +412,15 @@ public class APICommandFactory {
     }
 
     public static TradeTransactionResponse executeTradeTransactionCommand(SyncAPIConnector connector, TRADE_OPERATION_CODE cmd, TRADE_TRANSACTION_TYPE type, Double price, Double sl, Double tp, String symbol, Double volume, Long order, String comment, Long expiration) throws APICommandConstructionException, APIReplyParseException, APIErrorResponse, APICommunicationException {
-        return new TradeTransactionResponse(connector.safeExecuteCommand(createTradeTransactionCommand(cmd, type, price, sl, tp, symbol, volume, order, comment, expiration)));
+        return new TradeTransactionResponse(connector.safeExecuteCommand(createTradeTransactionCommand(connector, cmd, type, price, sl, tp, symbol, volume, order, comment, expiration)));
     }
 
     public static TradeTransactionStatusResponse executeTradeTransactionStatusCommand(SyncAPIConnector connector, long order) throws APICommandConstructionException, APIReplyParseException, APICommunicationException, APIErrorResponse {
-        return new TradeTransactionStatusResponse(connector.safeExecuteCommand(createTradeTransactionStatusCommand(order)));
+        return new TradeTransactionStatusResponse(connector.safeExecuteCommand(createTradeTransactionStatusCommand(connector, order)));
     }
 
     public static TradesResponse executeTradesCommand(SyncAPIConnector connector, Boolean openedOnly) throws APICommandConstructionException, APIReplyParseException, APICommunicationException, APIErrorResponse {
-        return new TradesResponse(connector.safeExecuteCommand(createTradesCommand(openedOnly)));
+        return new TradesResponse(connector.safeExecuteCommand(createTradesCommand(connector, openedOnly)));
     }
 
     public static TradesHistoryResponse executeTradesHistoryCommand(SyncAPIConnector connector, Long start, Long end) throws APICommandConstructionException, APICommunicationException, APIReplyParseException, APIErrorResponse {
