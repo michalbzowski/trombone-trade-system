@@ -7,3 +7,9 @@
 # Editor-based HTTP Client requests
 /httpRequests/
 .idea
+.settings
+.vscode
+/target
+.classpath
+.project
+*.log
