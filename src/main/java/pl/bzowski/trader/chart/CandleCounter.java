@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 public class CandleCounter {
 
 
-    private int timeInterval = 1;
+    private final int timeInterval = 1;
     private STickRecord candelChartIntervalFirstPrint = null;
     private double open = 0.0;
     private double close = 0.0;

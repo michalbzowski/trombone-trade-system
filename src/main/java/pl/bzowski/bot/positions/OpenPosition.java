@@ -2,17 +2,14 @@ package pl.bzowski.bot.positions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.ta4j.core.Indicator;
-import org.ta4j.core.indicators.EMAIndicator;
-import org.ta4j.core.indicators.ParabolicSarIndicator;
-import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
-import org.ta4j.core.num.DecimalNum;
+import pl.bzowski.bot.commands.SymbolCommand;
+import pl.bzowski.bot.commands.TradeTransactionCommand;
+import pl.bzowski.bot.commands.TradeTransactionStatusCommand;
+import pl.bzowski.bot.commands.TradesCommand;
+import pl.bzowski.bot.strategies.StrategyWithLifeCycle;
 import pro.xstore.api.message.codes.REQUEST_STATUS;
 import pro.xstore.api.message.codes.TRADE_OPERATION_CODE;
 import pro.xstore.api.message.codes.TRADE_TRANSACTION_TYPE;
-import pro.xstore.api.message.command.APICommandFactory;
-import pl.bzowski.bot.commands.*;
-import pl.bzowski.bot.strategies.StrategyWithLifeCycle;
 import pro.xstore.api.message.error.APICommandConstructionException;
 import pro.xstore.api.message.error.APICommunicationException;
 import pro.xstore.api.message.error.APIReplyParseException;
@@ -24,16 +21,16 @@ import pro.xstore.api.message.response.*;
 public class OpenPosition {
 
     private final Logger logger = LoggerFactory.getLogger(OpenPosition.class);
-    
-    private TradeTransactionCommand tradeTransactionCommand;
-    private SymbolCommand symbolCommand;
-    private TradeTransactionStatusCommand tradeTransactionStatusCommand;
-    private TradesCommand tradesCommand;
+
+    private final TradeTransactionCommand tradeTransactionCommand;
+    private final SymbolCommand symbolCommand;
+    private final TradeTransactionStatusCommand tradeTransactionStatusCommand;
+    private final TradesCommand tradesCommand;
 
     public OpenPosition(TradeTransactionCommand tradeTransactionCommand,
-            SymbolCommand symbolCommand,
-            TradeTransactionStatusCommand tradeTransactionStatusCommand,
-            TradesCommand tradesCommand) {
+                        SymbolCommand symbolCommand,
+                        TradeTransactionStatusCommand tradeTransactionStatusCommand,
+                        TradesCommand tradesCommand) {
         this.tradeTransactionCommand = tradeTransactionCommand;
         this.symbolCommand = symbolCommand;
         this.tradeTransactionStatusCommand = tradeTransactionStatusCommand;

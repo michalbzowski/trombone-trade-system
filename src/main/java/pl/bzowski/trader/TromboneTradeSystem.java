@@ -24,7 +24,7 @@ public class TromboneTradeSystem {
     private final TickRepository tickRepository;
     private final Trader trader;
     private final Balance balance;
-    private SyncAPIConnector connector;
+    private final SyncAPIConnector connector;
 
 
     public TromboneTradeSystem(SyncAPIConnector connector, TickRepository tickRepository, XStationStreamingListener streamingListener) {

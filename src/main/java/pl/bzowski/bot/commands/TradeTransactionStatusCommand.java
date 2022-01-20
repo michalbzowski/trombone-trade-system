@@ -10,14 +10,14 @@ import pro.xstore.api.sync.SyncAPIConnector;
 
 public class TradeTransactionStatusCommand {
 
-  private SyncAPIConnector connector;
+    private final SyncAPIConnector connector;
 
-  public TradeTransactionStatusCommand(SyncAPIConnector connector) {
-    this.connector = connector;
-  }
+    public TradeTransactionStatusCommand(SyncAPIConnector connector) {
+        this.connector = connector;
+    }
 
-  public TradeTransactionStatusResponse execute(long transactionOrderId) throws APICommandConstructionException, APIReplyParseException, APICommunicationException, APIErrorResponse {
-    return APICommandFactory.executeTradeTransactionStatusCommand(connector, transactionOrderId);
-  }
+    public TradeTransactionStatusResponse execute(long transactionOrderId) throws APICommandConstructionException, APIReplyParseException, APICommunicationException, APIErrorResponse {
+        return APICommandFactory.executeTradeTransactionStatusCommand(connector, transactionOrderId);
+    }
 
 }

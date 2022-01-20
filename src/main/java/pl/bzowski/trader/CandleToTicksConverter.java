@@ -8,11 +8,11 @@ import java.util.Random;
 import java.util.function.Consumer;
 
 public class CandleToTicksConverter {
-    private long MINUTE_IN_MILISECONDS = 60_000L;
     private final long candleIntervalInMiliseconds;
-    private String symbol;
-    private RateInfoRecord currentCandle;
     Random random = new Random();
+    private final long MINUTE_IN_MILISECONDS = 60_000L;
+    private final String symbol;
+    private final RateInfoRecord currentCandle;
 
     public CandleToTicksConverter(RateInfoRecord currentCandle, PERIOD_CODE periodCode, String symbol) {
         this.currentCandle = currentCandle;

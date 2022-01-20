@@ -10,14 +10,14 @@ import pro.xstore.api.sync.SyncAPIConnector;
 
 public class SymbolCommand {
 
-  private SyncAPIConnector connector;
+    private final SyncAPIConnector connector;
 
-  public SymbolCommand(SyncAPIConnector connector) {
-    this.connector = connector;
-  }
+    public SymbolCommand(SyncAPIConnector connector) {
+        this.connector = connector;
+    }
 
-  public SymbolResponse execute(String symbol) throws APICommandConstructionException, APIReplyParseException, APIErrorResponse, APICommunicationException {
-    return APICommandFactory.executeSymbolCommand(connector, symbol);
-  }
+    public SymbolResponse execute(String symbol) throws APICommandConstructionException, APIReplyParseException, APIErrorResponse, APICommunicationException {
+        return APICommandFactory.executeSymbolCommand(connector, symbol);
+    }
 
 }

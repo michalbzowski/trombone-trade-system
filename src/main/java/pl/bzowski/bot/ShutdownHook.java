@@ -6,7 +6,7 @@ import pro.xstore.api.sync.SyncAPIConnector;
 import java.util.Map;
 
 public class ShutdownHook {
-    public static void shutdownHook(SyncAPIConnector connector, Map<String, BotInstanceForSymbol> buttons) {
+    public static void shutdownHook(SyncAPIConnector connector, Map<String, IchimokuTrendAndSignalBot> buttons) {
         Thread printingHook = new Thread(() -> {
             try {
                 buttons.keySet().forEach(symbol -> {

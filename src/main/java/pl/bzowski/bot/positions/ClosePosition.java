@@ -2,14 +2,12 @@ package pl.bzowski.bot.positions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import pl.bzowski.bot.commands.TradeTransactionCommand;
 import pl.bzowski.bot.commands.TradeTransactionStatusCommand;
 import pl.bzowski.bot.commands.TradesCommand;
 import pl.bzowski.bot.strategies.StrategyWithLifeCycle;
 import pro.xstore.api.message.codes.TRADE_OPERATION_CODE;
 import pro.xstore.api.message.codes.TRADE_TRANSACTION_TYPE;
-import pro.xstore.api.message.command.APICommandFactory;
 import pro.xstore.api.message.error.APICommandConstructionException;
 import pro.xstore.api.message.error.APICommunicationException;
 import pro.xstore.api.message.error.APIReplyParseException;
@@ -19,21 +17,20 @@ import pro.xstore.api.message.response.APIErrorResponse;
 import pro.xstore.api.message.response.TradeTransactionResponse;
 import pro.xstore.api.message.response.TradeTransactionStatusResponse;
 import pro.xstore.api.message.response.TradesResponse;
-import pro.xstore.api.sync.SyncAPIConnector;
 
 public class ClosePosition {
 
     Logger logger = LoggerFactory.getLogger(ClosePosition.class);
-    private TradesCommand tradesCommand;
-    private TradeTransactionCommand tradeTransactionCommand;
-    private TradeTransactionStatusCommand tradeTransactionStatusCommand;
+    private final TradesCommand tradesCommand;
+    private final TradeTransactionCommand tradeTransactionCommand;
+    private final TradeTransactionStatusCommand tradeTransactionStatusCommand;
 
     public ClosePosition(TradesCommand tradesCommand, TradeTransactionCommand tradeTransactionCommand, TradeTransactionStatusCommand tradeTransactionStatusCommand) {
         this.tradesCommand = tradesCommand;
         this.tradeTransactionCommand = tradeTransactionCommand;
         this.tradeTransactionStatusCommand = tradeTransactionStatusCommand;
     }
-        
+
 
     public synchronized long closePosition(StrategyWithLifeCycle strategy) {
         TradesResponse tradesResponse;
@@ -69,8 +66,8 @@ public class ClosePosition {
             logger.info("Closed: {}", ttsCloseResponse);
         } catch (APIErrorResponse | APICommandConstructionException | APIReplyParseException
                 | APICommunicationException e1) {
-            logger.error("Closing position {} failed: {}","xxx", e1);
-            return  0;
+            logger.error("Closing position {} failed: {}", "xxx", e1);
+            return 0;
         }
         return 0;
     }

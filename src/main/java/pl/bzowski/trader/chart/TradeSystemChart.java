@@ -39,13 +39,14 @@ public class TradeSystemChart extends JFrame implements XStationEventHandler {
     private static final DateFormat READABLE_TIME_FORMAT = new SimpleDateFormat("kk:mm:ss");
     private final StochasticOscilator stochasticOscilator = IndicatorsFactory.createStochasticOscilator();
     private final IntervalComboBox intervalComboBox;
-
+    List<RateInfoRecord> candles = new ArrayList<>();
+    long MIN_IN_MILISCONDS = 60_000;
     private OHLCSeries ohlcSeries;
     private TimeSeries volumeSeries;
     private TimeSeries stochSeriesK;
     private TimeSeries stochSeriesD;
     private JFreeChart chart;
-    private CandleCounter candleCounter = new CandleCounter();
+    private final CandleCounter candleCounter = new CandleCounter();
 
     public TradeSystemChart(String applicationTitle,
                             String chartTitle,
@@ -224,8 +225,6 @@ public class TradeSystemChart extends JFrame implements XStationEventHandler {
         return candlestickSubplot;
     }
 
-    List<RateInfoRecord> candles = new ArrayList<>();
-
     /**
      * Fill series with data.
      */
@@ -247,9 +246,6 @@ public class TradeSystemChart extends JFrame implements XStationEventHandler {
             e.printStackTrace();
         }
     }
-
-
-    long MIN_IN_MILISCONDS = 60_000;
 
     @Override
     public void handle(STickRecord tickRecord) {

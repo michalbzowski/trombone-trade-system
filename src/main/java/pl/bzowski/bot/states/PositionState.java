@@ -2,10 +2,10 @@ package pl.bzowski.bot.states;
 
 public interface PositionState {
 
-  boolean isOpened();
+    boolean isOpened();
 
-  boolean canBeClosed(long positionId);
+    boolean canBeClosed(long positionId);
 
-  long getPositionId();
+    long getPositionId();
 
 }

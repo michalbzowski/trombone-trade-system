@@ -11,14 +11,14 @@ import pro.xstore.api.sync.SyncAPIConnector;
 
 public class ChartRangeCommand {
 
-  private SyncAPIConnector connector;
+    private final SyncAPIConnector connector;
 
-  public ChartRangeCommand(SyncAPIConnector connector) {
-    this.connector = connector;
-  }
+    public ChartRangeCommand(SyncAPIConnector connector) {
+        this.connector = connector;
+    }
 
-  public ChartResponse execute(ChartRangeInfoRecord record) throws APICommandConstructionException, APIReplyParseException, APIErrorResponse, APICommunicationException {
-    return APICommandFactory.executeChartRangeCommand(connector, record);
-  }
-  
+    public ChartResponse execute(ChartRangeInfoRecord record) throws APICommandConstructionException, APIReplyParseException, APIErrorResponse, APICommunicationException {
+        return APICommandFactory.executeChartRangeCommand(connector, record);
+    }
+
 }

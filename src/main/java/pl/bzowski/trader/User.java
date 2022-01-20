@@ -2,9 +2,9 @@ package pl.bzowski.trader;
 
 public class User {
 
-    private String id;
-    private String name;
-    private String password;
+    private final String id;
+    private final String name;
+    private final String password;
 
     public User(String id, String name, String password) {
         this.id = id;

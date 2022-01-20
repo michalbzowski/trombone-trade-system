@@ -10,14 +10,14 @@ import pro.xstore.api.sync.SyncAPIConnector;
 
 public class TradesCommand {
 
-  private SyncAPIConnector connector;
+    private final SyncAPIConnector connector;
 
-  public TradesCommand(SyncAPIConnector connector) {
-    this.connector = connector;
-  }
+    public TradesCommand(SyncAPIConnector connector) {
+        this.connector = connector;
+    }
 
-  public TradesResponse execute(boolean openedOnly) throws APICommandConstructionException, APIReplyParseException, APICommunicationException, APIErrorResponse {
-    return APICommandFactory.executeTradesCommand(connector, openedOnly);
-  }
+    public TradesResponse execute(boolean openedOnly) throws APICommandConstructionException, APIReplyParseException, APICommunicationException, APIErrorResponse {
+        return APICommandFactory.executeTradesCommand(connector, openedOnly);
+    }
 
 }

@@ -2,28 +2,18 @@ package pl.bzowski.bot.strategies;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.ta4j.core.BaseStrategy;
-import org.ta4j.core.BaseTradingRecord;
-import org.ta4j.core.Indicator;
-import org.ta4j.core.Rule;
-import org.ta4j.core.TradingRecord;
-
-import pl.bzowski.bot.states.PositionClosed;
-import pl.bzowski.bot.states.PositionCreated;
-import pl.bzowski.bot.states.PositionCreatingFailed;
-import pl.bzowski.bot.states.PositionCreatingPending;
-import pl.bzowski.bot.states.PositionState;
+import org.ta4j.core.*;
+import pl.bzowski.bot.states.*;
 
 import java.util.Arrays;
 
 public class StrategyWithLifeCycle extends BaseStrategy {
 
-    private String symbol;
-    private PositionState positionState = new PositionClosed();
-    private TradingRecord tradingRecord = new BaseTradingRecord();
-
     private final Indicator[] indicators;
+    private final String symbol;
+    private final TradingRecord tradingRecord = new BaseTradingRecord();
     public Logger logger = LoggerFactory.getLogger(StrategyWithLifeCycle.class);
+    private PositionState positionState = new PositionClosed();
 
     public StrategyWithLifeCycle(String name, String symbol, Rule entryRule, Rule exitRule, Indicator... indicators) {
         super(name, entryRule, exitRule);
@@ -88,18 +78,18 @@ public class StrategyWithLifeCycle extends BaseStrategy {
     }
 
     public TradingRecord getTradingRecord() {
-      return tradingRecord;
+        return tradingRecord;
     }
-    
+
     public String getSymbol() {
-      return symbol;
+        return symbol;
     }
 
     public boolean isLong() {
-      return getName().contains("LONG");
+        return getName().contains("LONG");
     }
 
     public boolean isShort() {
-      return getName().contains("SHORT");
+        return getName().contains("SHORT");
     }
 }

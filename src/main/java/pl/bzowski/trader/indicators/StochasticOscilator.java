@@ -49,7 +49,7 @@ public class StochasticOscilator {
     private double maximumPrice(List<RateInfoRecord> candles) {
         int size = candles.size();
         double maximumPrice = Double.MIN_VALUE;
-        for(int i = size - 1; i >= 0 && i >= size - 1 - periodK; i--) {
+        for (int i = size - 1; i >= 0 && i >= size - 1 - periodK; i--) {
             RateInfoRecord rateInfoRecord = candles.get(i);
             double price = rateInfoRecord.getOpen() + rateInfoRecord.getHigh();
             maximumPrice = Double.max(price, maximumPrice);
@@ -60,7 +60,7 @@ public class StochasticOscilator {
     private double minimumPrice(List<RateInfoRecord> candles) {
         int size = candles.size();
         double minimumPrice = Double.MAX_VALUE;
-        for(int i = size - 1; i >= 0 && i >= size - 1- periodK; i--) {
+        for (int i = size - 1; i >= 0 && i >= size - 1 - periodK; i--) {
             RateInfoRecord rateInfoRecord = candles.get(i);
             double price = rateInfoRecord.getOpen() + rateInfoRecord.getLow();
             minimumPrice = Double.min(price, minimumPrice);
@@ -69,7 +69,7 @@ public class StochasticOscilator {
     }
 
     private double actualClosePrice(List<RateInfoRecord> candles) {
-        if(candles.size() == 0) {
+        if (candles.size() == 0) {
             return 0.0d;
         }
         RateInfoRecord lastCandle = candles.get(candles.size() - 1);
@@ -78,10 +78,10 @@ public class StochasticOscilator {
 
     public double getSignal(List<RateInfoRecord> candles) {
         double sumForAverage = 0d;
-        for(int i = 0; i < periodD; i++) {
+        for (int i = 0; i < periodD; i++) {
             sumForAverage += getMain(candles, i);
         }
-        return  sumForAverage / periodD;
+        return sumForAverage / periodD;
     }
 
     public long getSlowingInMilliseconds() {

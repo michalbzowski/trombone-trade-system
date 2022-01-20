@@ -17,12 +17,12 @@ import java.awt.event.ActionListener;
 public class StrategyTester {
 
     //please change the login and password below
-    private static String LOGIN = "xxx";
-    private static String PASSWORD = "xxx";
+    private static final String LOGIN = "xxx";
+    private static final String PASSWORD = "xxx";
 
     //please provide the application details if you received them
-    private static String APP_ID = "xxx";
-    private static String APP_NAME = "xxx";
+    private static final String APP_ID = "xxx";
+    private static final String APP_NAME = "xxx";
 
     public static void main(String[] args) throws Exception {
 
@@ -43,7 +43,6 @@ public class StrategyTester {
                     startTestJButton,
                     symbolJTextFiled,
                     intervalComboBox);
-
 
 
             Balance balance = new Balance();

@@ -5,12 +5,12 @@ import pl.bzowski.trader.strategies.StochasticOscilatorStrategy;
 
 public class MyPosition {
 
-    private String symbol;
-    private PositionDirection positionDirection;
-    private double price;
-    private double stopLoss;
-    private double takeProfit;
-    private StochasticOscilatorStrategy stochasticOscilatorStrategy;
+    private final String symbol;
+    private final PositionDirection positionDirection;
+    private final double price;
+    private final double stopLoss;
+    private final double takeProfit;
+    private final StochasticOscilatorStrategy stochasticOscilatorStrategy;
     private PositionState positionState = new PositionOpened();
 
     public MyPosition(String symbol, PositionDirection positionDirection, double price, double stopLoss, double takeProfit, StochasticOscilatorStrategy stochasticOscilatorStrategy) {
@@ -34,28 +34,29 @@ public class MyPosition {
     public double getTakeProfit() {
         return takeProfit;
     }
-/*
-Podczas inwestowania na rynku finansowym widzisz zarówno cenę sprzedaży, jak i cenę kupna.
-Cena kupna jest zawsze wyższa od ceny sprzedaży, a różnica między tymi dwiema cenami nazywana jest spreadem,
-który jednocześnie stanowi koszt otwarcia  transakcji na rynku.
 
-Cena ask oznacza cenę, po której inwestor może zawrzeć transakcję kupna.
-Inaczej, cenę ask można zdefiniować jako cenę, po której jesteś w stanie kupić instrument finansowy.
-Należy również pamietać, że
-przy otwieraniu pozycji długiej, transakcja
-    zostanie otwarta po cenie kupna (ask),
-    a zamknięta po cenie sprzedaży (bid).
+    /*
+    Podczas inwestowania na rynku finansowym widzisz zarówno cenę sprzedaży, jak i cenę kupna.
+    Cena kupna jest zawsze wyższa od ceny sprzedaży, a różnica między tymi dwiema cenami nazywana jest spreadem,
+    który jednocześnie stanowi koszt otwarcia  transakcji na rynku.
 
-Z drugiej strony, krótką pozycję
-    otworzy się po cenie sprzedaży (bid),
-    a zamknie po cenie kupna (ask).
+    Cena ask oznacza cenę, po której inwestor może zawrzeć transakcję kupna.
+    Inaczej, cenę ask można zdefiniować jako cenę, po której jesteś w stanie kupić instrument finansowy.
+    Należy również pamietać, że
+    przy otwieraniu pozycji długiej, transakcja
+        zostanie otwarta po cenie kupna (ask),
+        a zamknięta po cenie sprzedaży (bid).
+
+    Z drugiej strony, krótką pozycję
+        otworzy się po cenie sprzedaży (bid),
+        a zamknie po cenie kupna (ask).
 
 
-Pozycja Long
+    Pozycja Long
 
-----ASK
+    ----ASK
 
- */
+     */
     public void checkPosition(double ask, double bid, Balance balance) {
         if (positionDirection.isLong() && bid <= stopLoss) {
             closePosition();

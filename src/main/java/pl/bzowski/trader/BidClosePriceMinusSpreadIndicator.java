@@ -8,10 +8,10 @@ import org.ta4j.core.num.Num;
 
 public class BidClosePriceMinusSpreadIndicator extends ClosePriceIndicator {
 
-    private double spreadMoreOver;
+    private final double spreadMoreOver;
 
     public BidClosePriceMinusSpreadIndicator(BarSeries series, double spreadMoreOver) {
-         super(series);
+        super(series);
         this.spreadMoreOver = spreadMoreOver;
     }
 

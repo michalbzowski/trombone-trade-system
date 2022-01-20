@@ -12,7 +12,7 @@ public class XStationStreamingListener extends StreamingListener {
 
     Logger logger = LoggerFactory.getLogger(XStationStreamingListener.class);
 
-    private Collection<XStationEventHandler> handlers = new ArrayList<>();
+    private final Collection<XStationEventHandler> handlers = new ArrayList<>();
 
     @Override
     public void receiveTradeRecord(STradeRecord tradeRecord) {

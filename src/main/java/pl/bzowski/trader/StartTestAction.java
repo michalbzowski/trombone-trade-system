@@ -23,9 +23,9 @@ public class StartTestAction implements ActionListener {
     private static final long TWO_HOURS = 86_400_000 / 12;
 
     private final SyncAPIConnector connector;
-    private XStationStreamingListener xStationStreamingListener;
     private final SymbolJTextFiled symbolField;
-    private IntervalComboBox intervalComboBox;
+    private final XStationStreamingListener xStationStreamingListener;
+    private final IntervalComboBox intervalComboBox;
 
     public StartTestAction(SyncAPIConnector connector, XStationStreamingListener xStationStreamingListener, SymbolJTextFiled symbolField, IntervalComboBox intervalComboBox) {
         this.connector = connector;

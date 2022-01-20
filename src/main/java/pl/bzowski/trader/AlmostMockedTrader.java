@@ -20,9 +20,9 @@ public class AlmostMockedTrader implements Trader {
 
     private double ask;
     private double bid;
-    private SyncAPIConnector connector;
-    private Balance balance;
-    private Map<UUID, MyPosition> openedPositions = new HashMap<>();
+    private final SyncAPIConnector connector;
+    private final Balance balance;
+    private final Map<UUID, MyPosition> openedPositions = new HashMap<>();
 
     public AlmostMockedTrader(SyncAPIConnector connector, Balance balance) {
         this.connector = connector;

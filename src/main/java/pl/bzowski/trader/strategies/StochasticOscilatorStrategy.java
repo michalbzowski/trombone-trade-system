@@ -1,11 +1,11 @@
 package pl.bzowski.trader.strategies;
 
+import pl.bzowski.trader.Trader;
 import pl.bzowski.trader.XStationEventHandler;
 import pl.bzowski.trader.chart.CandleCounter;
 import pl.bzowski.trader.chart.MyCandle;
 import pl.bzowski.trader.indicators.IndicatorsFactory;
 import pl.bzowski.trader.indicators.StochasticOscilator;
-import pl.bzowski.trader.Trader;
 import pro.xstore.api.message.error.APICommandConstructionException;
 import pro.xstore.api.message.error.APICommunicationException;
 import pro.xstore.api.message.error.APIReplyParseException;
@@ -23,10 +23,10 @@ public class StochasticOscilatorStrategy implements XStationEventHandler {
     //Ww fajnie opisuje strategie jak handlować
     private static final double DELTA = 0.005;
     private StrategyState state = new WaitingForASignal();
-    private StochasticOscilator stochasticOscilator = IndicatorsFactory.createStochasticOscilator();
-    private Trader trader;
-    private CandleCounter candleCounter = new CandleCounter();
-    private List<RateInfoRecord> candles = new ArrayList<>();
+    private final StochasticOscilator stochasticOscilator = IndicatorsFactory.createStochasticOscilator();
+    private final Trader trader;
+    private final CandleCounter candleCounter = new CandleCounter();
+    private final List<RateInfoRecord> candles = new ArrayList<>();
     private UUID openedPositionId;
 
     public StochasticOscilatorStrategy(Trader trader) {

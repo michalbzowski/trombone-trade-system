@@ -6,6 +6,9 @@ import org.ta4j.core.Bar;
 import org.ta4j.core.BarSeries;
 import org.ta4j.core.BaseBar;
 import org.ta4j.core.BaseBarSeries;
+import org.ta4j.core.aggregator.BarAggregator;
+import org.ta4j.core.aggregator.BaseBarSeriesAggregator;
+import org.ta4j.core.aggregator.DurationBarAggregator;
 import org.ta4j.core.num.DecimalNum;
 import pro.xstore.api.message.codes.PERIOD_CODE;
 import pro.xstore.api.message.records.RateInfoRecord;
@@ -15,26 +18,26 @@ import java.time.*;
 import java.util.HashMap;
 import java.util.List;
 
-public class SeriesHandler {
+public class MinuteSeriesHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(SeriesHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(MinuteSeriesHandler.class);
 
     private static final long MINUTE_IN_MILLISECONDS = 60_000L;
     private final PERIOD_CODE periodCode;
-    private final HashMap<String, BarSeries> seriesMap;
+    private final HashMap<String, BarSeries> fourHoursSeries;
 
-    public SeriesHandler(PERIOD_CODE periodCode) {
-        this.periodCode = periodCode;
-        this.seriesMap = new HashMap<String, BarSeries>();
+    public MinuteSeriesHandler() {
+        this.periodCode = PERIOD_CODE.PERIOD_H4;
+        this.fourHoursSeries = new HashMap<>();
     }
 
-    public BarSeries createSeries(String symbol) {
+    public BarSeries createFourHoursSeries(String symbol) {
         BarSeries series = new BaseBarSeries(symbol);
-        this.seriesMap.put(symbol, series);
-        return seriesMap.get(symbol);
+        this.fourHoursSeries.put(symbol, series);
+        return fourHoursSeries.get(symbol);
     }
 
-    public void fillSeries(List<RateInfoRecord> archiveCandles, int digits, BarSeries series) {
+    public void fillFourHoursSeries(List<RateInfoRecord> archiveCandles, int digits, BarSeries series) {
         double divider = Math.pow(10, digits);
         archiveCandles.forEach(record -> {
             long ctm = record.getCtm();
@@ -48,8 +51,8 @@ public class SeriesHandler {
         });
     }
 
-    public int update(SCandleRecord record) {
-        BarSeries series = seriesMap.get(record.getSymbol());
+    public int updateFourHoursSeriesWithOneMinuteCandle(SCandleRecord record) {
+        BarSeries series = fourHoursSeries.get(record.getSymbol());
         //Ostatni bar z serii może być jeszcze w trakcie rysowania
         Bar lastBar = series.getLastBar();
 
@@ -76,6 +79,13 @@ public class SeriesHandler {
 
         int endIndex = series.getEndIndex();
         return endIndex;
+    }
+
+    public BarSeries convertToPeriod(String symbol, PERIOD_CODE periodCode) {
+        BarAggregator barAggregator = new DurationBarAggregator(Duration.ofMinutes(periodCode.getCode()));
+        BaseBarSeriesAggregator baseBarSeriesAggregator = new BaseBarSeriesAggregator(barAggregator);
+        BarSeries series = fourHoursSeries.get(symbol);
+        return baseBarSeriesAggregator.aggregate(series);
     }
 
     private BaseBar getBaseBar(long code, long ctm, double close, double open, double high, double low) {

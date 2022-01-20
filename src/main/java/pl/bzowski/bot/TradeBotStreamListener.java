@@ -9,23 +9,22 @@ import java.util.Map;
 
 public class TradeBotStreamListener extends StreamingListener {
 
+    private final Map<String, IchimokuTrendAndSignalBot> strategies;
+    private final MinuteSeriesHandler minuteSeriesHandler;
     Logger logger = LoggerFactory.getLogger(TradeBotStreamListener.class);
 
-    private final Map<String, BotInstanceForSymbol> strategies;
-    private final SeriesHandler seriesHandler;
-
-    public TradeBotStreamListener(Map<String, BotInstanceForSymbol> strategies, SeriesHandler seriesHandler) {
+    public TradeBotStreamListener(Map<String, IchimokuTrendAndSignalBot> strategies, MinuteSeriesHandler minuteSeriesHandler) {
         this.strategies = strategies;
-        this.seriesHandler = seriesHandler;
+        this.minuteSeriesHandler = minuteSeriesHandler;
     }
 
     @Override
     public void receiveCandleRecord(SCandleRecord candleRecord) {
         logger.info("Stream candle record: " + candleRecord);
-        BotInstanceForSymbol botInstanceForSymbol = strategies.get(candleRecord.getSymbol());
-        int endIndex = seriesHandler.update(candleRecord);
-        if (endIndex > 0) {
-            botInstanceForSymbol.onTick(endIndex);
+        IchimokuTrendAndSignalBot ichimokuTrendAndSignalBot = strategies.get(candleRecord.getSymbol());
+        int endIndex = minuteSeriesHandler.updateFourHoursSeriesWithOneMinuteCandle(candleRecord);
+        if (endIndex > 0) { //Co 4 godziny warunek będzie spełniony
+            ichimokuTrendAndSignalBot.onTick(endIndex);
         }
     }
 
